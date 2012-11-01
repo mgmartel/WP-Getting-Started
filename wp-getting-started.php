@@ -28,6 +28,11 @@ define('WPGS_DIR', plugin_dir_path(__FILE__));
 define('WPGS_URL', plugin_dir_url(__FILE__));
 define('WPGS_IMAGES_URL', WPGS_URL . 'images/');
 
+/**
+ * Requires and includes
+ */
+require_once ( WPGS_DIR . 'lib/class.wp-help-pointers.php' );
+
 if ( ! class_exists('WPGettingStarted') ) :
 
     class WPGettingStarted    {
@@ -61,6 +66,8 @@ if ( ! class_exists('WPGettingStarted') ) :
             remove_action( 'welcome_panel', 'wp_welcome_panel' );
             add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
             add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
+
+            add_action   ( 'admin_enqueue_scripts', array ( &$this, 'pointers' ) );
         }
 
             /**
@@ -71,6 +78,45 @@ if ( ! class_exists('WPGettingStarted') ) :
             public function wpgettingstarted() {
                 $this->__construct();
             }
+
+        public function pointers() {
+            $pointers = array(
+                            array(
+                                'id' => 'wpgs_dash',
+                                'screen' => 'dashboard',
+                                'target' => '#menu-dashboard',
+                                'title' => __ ( 'Dashboard' ),
+                                'content' => __( 'Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner.' ) . "</p><p>" . __ ( "You can always return to this screen by clicking the Dashboard icon above.", 'wp-getting-started' ),
+                                'position' => array(
+                                        'edge' => 'top',
+                                        'align' => 'top'
+                                    )
+                                ),
+                            array(
+                                'id' => 'wpgs_post',
+                                'screen' => 'post',
+                                'target' => '#menu-posts',
+                                'title' => __ ( 'Posts' ),
+                                'content' => __ ( "Posts are what make your blog a blog — they’re servings of content, similar to journal entries, listed in reverse chronological order. Posts can be as short or as long as you like; some are as brief as Twitter updates, while others are the length of essays.", 'wp-getting-started' ),
+                                'position' => array(
+                                        'edge' => 'top',
+                                        'align' => 'top'
+                                    )
+                                ),
+                            array(
+                                'id' => 'wpgs_page',
+                                'screen' => 'page',
+                                'target' => '#menu-pages',
+                                'title' => __ ( 'Pages' ),
+                                'content' => __ ( "Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections. You can edit them any time.", 'wp-getting-started' ),
+                                'position' => array(
+                                        'edge' => 'top',
+                                        'align' => 'top'
+                                    )
+                                ),
+                             );
+            $this->pointers = new WP_Help_Pointer($pointers);
+        }
 
         protected function is_theme_chosen() {
             global $wp_version;
@@ -110,15 +156,24 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <div class="welcome-panel-column">
                     <h4><?php _e( 'Congratulations!', 'wp-getting-started' ); ?></h4>
                     <p><?php _e( 'Your new website is now up and running.', 'wp-getting-started' ); ?></p>
-                    <p><?php _e( 'To get started, follow the easy steps above, or', 'wp-getting-started' ); ?></p>
 
                     <?php if ( current_user_can( 'install_themes' ) || ( current_user_can( 'switch_themes' ) && count( wp_get_themes( array( 'allowed' => true ) ) ) > 1 ) ) : ?>
-                        <a class="button-primary welcome-button" href="<?php echo admin_url( 'themes.php?live=1' ); ?>"><?php _e( 'Click here to get started' ); ?></a>
+                        <a class="button-primary welcome-button" href="<?php echo admin_url( 'themes.php?live=1' ); ?>"><?php _e( 'Customize Your Site' ); ?></a>
                     <?php endif; ?>
+
+                </div>
+                <div class="welcome-panel-column">
+                    <h4>Next step</h4>
+                    <p><?php _e( 'To get started, follow the easy steps above.', 'wp-getting-started' ); ?></p>
+                </div>
+
+                <div class="welcome-panel-column welcome-panel-last">
+                    <h4>Help</h4>
+                    <p><?php _e( 'If things are ever unclear, use the \'Help\' button in top-right corner.', 'wp-getting-started' ); ?></p>
                 </div>
 
             <?php endif; ?>
-
+<?php /*
             <div class="welcome-panel-column">
                 <h4><?php _e( 'Next Steps' ); ?></h4>
                 <ul>
@@ -144,7 +199,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                     <li><?php printf( '<a id="wp350_widgets" href="%s">' . __( 'Add/remove widgets' ) . '</a>', admin_url( 'widgets.php' ) ); ?></li>
                     <li><?php printf( '<a id="wp350_edit_menu" href="%s">' . __( 'Edit your navigation menu' ) . '</a>', admin_url( 'nav-menus.php' ) ); ?></li>
                 </ul>
-            </div>
+            </div>*/ ?>
             <?php
         }
 

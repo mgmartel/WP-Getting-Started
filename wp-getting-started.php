@@ -93,17 +93,40 @@ if ( ! class_exists('WPGettingStarted') ) :
             // Change redirect after close in customizer
             add_action('customize_controls_init', array ( &$this, 'change_customizer_close_redirect' ) );
 
-            // Change redirect after close in live preview (if active)
-            add_action('wp_ltp_init', array ( &$this, 'change_ltp_close_redirect' ) );
-
-            // Keep the flow if Live Theme Preview is activated
-            add_filter ( 'wp_ltp_editurl', array ( &$this, 'add_wpgs_param' ) );
-            add_filter ( 'wp_ltp_activateurl', array ( &$this, 'add_wpgs_param' ) );
-
             // Return to dashboard after post
             add_action ( 'submitpage_box', array ( &$this, 'add_wpgs_hidden_field' ) );
             add_action ( 'submitpost_box', array ( &$this, 'add_wpgs_hidden_field' ) );
             add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 10, 2 );
+
+            // Change redirect after close in live preview (if active)
+            add_action('wp_ltp_init', array ( &$this, 'change_ltp_close_redirect' ) );
+            // Keep the flow if Live Theme Preview is activated
+            add_filter ( 'wp_ltp_editurl', array ( &$this, 'add_wpgs_param' ) );
+            add_filter ( 'wp_ltp_activateurl', array ( &$this, 'add_wpgs_param' ) );
+
+            // But also ensure a nice flow without LTP...
+            add_filter ( 'theme_action_links', array ( &$this, 'modify_theme_action_links' ), 10, 2 );
+            add_filter ( 'clean_url', array ( &$this, 'modify_theme_action_urls' ), 10, 2 );
+            add_action ( 'wp_redirect', array ( &$this, 'modify_switch_theme_redirect' ) );
+
+        }
+
+        public function modify_theme_action_urls( $url ) {
+            if ( $GLOBALS['current_screen']->id != 'themes' ) return $url;
+            if ( strpos ( $url, 'customize.php' ) ) {
+                return $this->add_wpgs_param( $url );
+            } else return $url;
+        }
+
+        public function modify_theme_action_links( $actions, $theme ) {
+            $actions['activate'] = str_replace( 'themes.php?action=activate', 'themes.php?action=activate&wpgs=1', $actions['activate'] );
+            return $actions;
+        }
+
+        public function modify_switch_theme_redirect( $location ) {
+            if ( strpos ( $location, 'themes.php?activated=true' ) )
+                return admin_url('index.php?wpgs_action=theme_activated');
+            else return $location;
         }
 
         public function add_wpgs_param ( $url ) {
@@ -458,4 +481,5 @@ if ( ! class_exists('WPGettingStarted') ) :
     }
 
     add_action('admin_init', array('WPGettingStarted', 'init'));
+    //if ( is_admin() ) WPGettingStarted::init();
 endif;

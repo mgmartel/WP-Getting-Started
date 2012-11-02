@@ -118,7 +118,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             echo
                 "
                 <script>
-                    setTimeout('_wpCustomizeSettings.url.activated = \"" . admin_url('index.php?activated=true&previewed') ."\";', 50);
+                    setTimeout('_wpCustomizeSettings.url.activated = \"" . admin_url('index.php?wpgs_action=theme_activated') ."\";', 50);
                 </script>
                 ";
         }
@@ -173,6 +173,8 @@ if ( ! class_exists('WPGettingStarted') ) :
                     else
                         $message = sprintf( __('Post published. <a href="%s">View post</a>'), esc_url( get_permalink($post_ID) ) . '" target="_blank' );
                     break;
+                case "theme_activated" :
+                    $message = sprintf( __( 'Settings saved and theme activated. <a href="%s">Visit site</a>' ), home_url( '/' ) . '" target="_blank' );
             }
             printf( '<div class="updated"> <p> %s </p> </div>', __ ( $message, 'wp-gettings-started' ) );
         }

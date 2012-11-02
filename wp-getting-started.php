@@ -98,10 +98,19 @@ if ( ! class_exists('WPGettingStarted') ) :
             // Keep the flow if Live Theme Preview is activated
             add_filter ( 'wp_ltp_editurl', array ( &$this, 'add_wpgs_param' ) );
             add_filter ( 'wp_ltp_activateurl', array ( &$this, 'add_wpgs_param' ) );
+
+            // Return to dashboard after post
+            add_action ( 'submitpage_box', array ( &$this, 'add_wpgs_hidden_field' ) );
+            add_action ( 'submitpost_box', array ( &$this, 'add_wpgs_hidden_field' ) );
+            add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 10, 2 );
         }
 
         public function add_wpgs_param ( $url ) {
             return add_query_arg( 'wpgs', '1', $url );
+        }
+
+        public function add_wpgs_hidden_field () {
+            echo "<input type='hidden' name='wpgs' value=1>";
         }
 
         public function change_customizer_activate_redirect() {
@@ -123,10 +132,41 @@ if ( ! class_exists('WPGettingStarted') ) :
             $return = admin_url('index.php');
         }
 
+        public function redirect_post_dashboard( $location, $postid ) {
+            if (isset($_POST['save']) || isset($_POST['publish'])) {
+                if (preg_match("/post=([0-9]*)/", $location, $match)) {
+                    $pl = get_permalink($match[1]);
+                    if ($pl) {
+                        wp_redirect( admin_url ("index.php?wpgs_action=saved&id=$postid&post_type={$GLOBALS['typenow']}" ) );
+                    }
+                }
+            }
+
+        }
+
         protected function set_welcome_panel() {
             remove_action( 'welcome_panel', 'wp_welcome_panel' );
             add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
             add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
+
+            if ( $_GET['wpgs_action'] && ! empty ( $_GET['wpgs_action'] ) )
+                add_action ( 'admin_notices', array ( &$this, 'admin_notice' ) );
+        }
+
+        public function admin_notice() {
+            $action = $_GET['wpgs_action'];
+
+            switch ( $action ) {
+                case "saved" :
+                    if ( ! isset ( $_GET['id'] ) ) break;
+                    $post_ID = $_GET['id'];
+                    if ( isset ( $_GET['post_type'] ) && $_GET['post_type'] == "page" )
+                        $message = sprintf( __('Page published. <a href="%s">View page</a>'), esc_url( get_permalink($post_ID) ) . '" target="_blank'  );
+                    else
+                        $message = sprintf( __('Post published. <a href="%s">View post</a>'), esc_url( get_permalink($post_ID) ) . '" target="_blank' );
+                    break;
+            }
+            printf( '<div class="updated"> <p> %s </p> </div>', __ ( $message, 'wp-gettings-started' ) );
         }
 
         public function set_pointers() {
@@ -209,6 +249,7 @@ if ( ! class_exists('WPGettingStarted') ) :
 
 
         public function the_instruction_panel() {
+            do_action ('wpgs_before_instuction_panel');
             ?>
             <div class="welcome-panel-column-container">
 
@@ -247,18 +288,41 @@ if ( ! class_exists('WPGettingStarted') ) :
                     <p><?php _e( 'Posts are entries listed in reverse chronological order on the blog home page or on the posts page.', 'wp-getting-started' ); ?></p>
                 </div>
 
-            <?php endif; ?>
-            <?php
+            <?php elseif ( $this->complete == 4 ) : ?>
+
+                <div class="welcome-panel-column">
+                    <h4><?php _e( 'Compeleted!', 'wp-getting-started' ); ?></h4>
+                    <p><?php _e( 'You have now set up your website and learned how to manage it.', 'wp-getting-started' ); ?></p>
+                    <p><?php _e( "Click 'Dismiss' to close this panel and start using your website. You can always reopen it by selecting 'Screen Options' and then 'Welcome'.", 'wp-getting-started' ); ?></p>
+                </div>
+
+                <div class="welcome-panel-column">
+                    <h4><?php _e( 'Pages', 'wp-getting-started' ); ?></h4>
+                    <p><?php _e( 'Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections.', 'wp-getting-started' ); ?></p>
+                </div>
+
+                <div class="welcome-panel-column">
+                    <h4><?php _e( 'Useful links', 'wp-getting-started' ); ?></h4>
+                    <ul>
+                        <li><?php printf( '<a href="%s">' . __( 'View your site' ) . '</a>', home_url( '/' ) ); ?></li><li><?php printf( '<a id="wp350_add_images" href="%s">' . __( 'Add image/media' ) . '</a>', admin_url( 'media-new.php' ) ); ?></li>
+                        <li><?php printf( '<a id="wp350_widgets" href="%s">' . __( 'Add/remove widgets' ) . '</a>', admin_url( 'widgets.php' ) ); ?></li>
+                        <li><?php printf( '<a id="wp350_edit_menu" href="%s">' . __( 'Edit your navigation menu' ) . '</a>', admin_url( 'nav-menus.php' ) ); ?></li>
+                    </ul>
+                </div>
+
+            <?php endif;
+
+            do_action ('wpgs_after_instuction_panel');
         }
 
         protected function set_current_state() {
-            $this->progress = array(
+            $this->progress = apply_filters ( 'wpgs_progress', array(
                 "theme_chosen"      => ( $this->is_theme_chosen() ) ? true : false,
                 "theme_customized"  => ( $this->is_theme_customized() ) ? true : false,
                 "theme_edited"      => ( $this->is_theme_customized() || $this->is_theme_chosen() ) ? true : false,
                 "has_pages"         => ( $this->site_has_pages() ) ? true : false,
                 "has_posts"         => ( $this->site_has_posts() ) ? true : false,
-            );
+            ) );
 
             $i = 0;
             foreach ( $this->progress as $prog ) {
@@ -268,11 +332,12 @@ if ( ! class_exists('WPGettingStarted') ) :
                 $i++;
             }
 
-            $this->walkthrough = ( isset ( $_GET['wpgs'] ) && $_GET['wpgs'] == true );
+            $this->walkthrough = apply_filters ( 'wpgs_walkthrough', ( isset ( $_REQUEST['wpgs'] ) && $_REQUEST['wpgs'] == true ) );
         }
 
         public function the_welcome_panel() {
 
+            do_action( 'wp_before_welcome_panel');
 
             ?>
             <style>

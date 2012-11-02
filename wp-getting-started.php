@@ -26,7 +26,8 @@ define('WPGS_VERSION', '0.1');
  */
 define('WPGS_DIR', plugin_dir_path(__FILE__));
 define('WPGS_URL', plugin_dir_url(__FILE__));
-define('WPGS_IMAGES_URL', WPGS_URL . 'images/');
+define('WPGS_INC_URL', WPGS_URL . '_inc/');
+define('WPGS_IMAGES_URL', WPGS_INC_URL . 'images/');
 
 /**
  * Requires and includes
@@ -68,6 +69,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function __construct() {
             $this->set_current_state();
+
             $this->set_welcome_panel();
 
             if ( $this->walkthrough )
@@ -149,8 +151,15 @@ if ( ! class_exists('WPGettingStarted') ) :
             add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
             add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
 
+            add_action ( 'admin_print_styles', array ( &$this, 'enqueue_welcome_style' ) );
+
             if ( $_GET['wpgs_action'] && ! empty ( $_GET['wpgs_action'] ) )
                 add_action ( 'admin_notices', array ( &$this, 'admin_notice' ) );
+        }
+
+        public function enqueue_welcome_style() {
+            if ( $GLOBALS['current_screen']->id == 'dashboard' )
+                wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
         }
 
         public function admin_notice() {
@@ -177,7 +186,7 @@ if ( ! class_exists('WPGettingStarted') ) :
         public function dashboard_pointers() {
             $pointers = array(
                 array(
-                    'id' => 'wpgs_dashb',
+                    'id' => 'wpgs_dash',
                     'screen' => 'dashboard',
                     'target' => '#menu-dashboard',
                     'title' => __ ( 'Dashboard' ),
@@ -336,61 +345,19 @@ if ( ! class_exists('WPGettingStarted') ) :
         }
 
         public function the_welcome_panel() {
+            //wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
 
             do_action( 'wp_before_welcome_panel');
-
             ?>
-            <style>
-                .welcome-panel .welcome-panel-column {
-                    width: 30%;
-                    min-width: 185px;
-                    float: left;
-                    padding-right: 15px;
-                }
-
-                div.welcome-progression-block {
-                    display: inline-block;
-                    vertical-align: middle;
-                }
-                div.welcome-progression-block * {
-                    text-align: center;
-                }
-                div.welcome-progression-block a p {
-                    width: 148px;
-                }
-                div.welcome-progression-block a, div.welcome-progression-block a p {
-                    text-decoration: none;
-                    color: #21759B;
-                    font-size: 13px;
-                    font-weight: bold;
-                }
-                div.welcome-progression-block a:hover p, div.welcome-progression-block a:active p {
-                    color: #D54E21;
-                }
-                div.welcome-progression-block h2 {
-                    margin-bottom: 20px;
-                }
-                div.welcome-progression-block.separate h2 {
-                    padding: 0 10px;
-                }
-                div.welcome-progression-block img {
-                    display: block;
-                    margin: 0 auto;
-                    padding: 0 10px;
-                }
-                div.welcome-progression-block p.completed {
-                    text-decoration: line-through;
-                }
-
-            </style>
-
-            <div class="welcome-panel-content">
+            <div class="welcome-panel-content<?php if ( $this->complete == 4 ) echo " completed"; ?>">
             <h3><?php _e( 'Welcome to WordPress!' ); ?></h3>
             <p class="about-description"><?php _e( 'We&#8217;ve assembled some links to get you started:' ); ?></p>
             <div class="welcome-panel-column-container">
 
                 <div class="welcome-progression-block">
-                    <h2>1. <?php _e( 'Website', 'wp-getting-started' ); ?></h2>
+                    <a href="<?php bloginfo('url'); ?>">
+                        <h2>1. <?php _e( 'Website', 'wp-getting-started' ); ?></h2>
+                    </a>
 
                     <a href="<?php bloginfo('url'); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "setup"; ?>.png">
@@ -403,7 +370,10 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                 <div class="welcome-progression-block">
 
-                    <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
+                    <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
+                        <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
+                    </a>
+
                     <div class="welcome-progression-block">
 
                         <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
@@ -430,7 +400,9 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <?php $this->print_arrow ( 2 ); ?>
 
                 <div class="welcome-progression-block">
-                    <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
+                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
+                        <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
+                    </a>
 
                     <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "pages"; if ( ! $this->progress['has_pages'] ) echo "_incomplete";  ?>.png">
@@ -442,7 +414,9 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <?php $this->print_arrow ( 3 ); ?>
 
                 <div class="welcome-progression-block">
-                    <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
+                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
+                        <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
+                    </a>
 
                     <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "posts"; if ( ! $this->progress['has_posts'] ) echo "_incomplete";  ?>.png">

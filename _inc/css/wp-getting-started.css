@@ -1,0 +1,43 @@
+.welcome-panel .welcome-panel-column {
+    width: 30%;
+    min-width: 185px;
+    float: left;
+    padding-right: 15px;
+}
+
+div.welcome-progression-block {
+    display: inline-block;
+    vertical-align: middle;
+}
+div.welcome-progression-block * {
+    text-align: center;
+}
+div.welcome-progression-block a p {
+    width: 148px;
+}
+div.welcome-progression-block a, div.welcome-progression-block a p {
+    text-decoration: none;
+    color: #21759B;
+    font-size: 13px;
+    font-weight: bold;
+}
+div.welcome-progression-block a:hover p, div.welcome-progression-block a:active p {
+    color: #D54E21;
+}
+div.welcome-progression-block h2 {
+    margin-bottom: 20px;
+}
+div.welcome-progression-block.separate h2 {
+    padding: 0 10px;
+}
+div.welcome-progression-block img {
+    display: block;
+    margin: 0 auto;
+    padding: 0 10px;
+}
+div.welcome-progression-block p.completed {
+    text-decoration: line-through;
+}
+div.welcome-panel-content.completed div.welcome-progression-block p.completed {
+    text-decoration: none;
+}

@@ -86,6 +86,11 @@ if ( ! class_exists('WPGettingStarted') ) :
                 $this->__construct();
             }
 
+        /**
+         * Makes sure all roads lead back to Rome
+         *
+         * @since 0.1
+         */
         protected function walkthrough_workflow() {
             // Change redirect after save and activate in customizer
             add_action ('customize_controls_print_footer_scripts', array ( &$this, 'change_customizer_activate_redirect' ) );
@@ -98,19 +103,27 @@ if ( ! class_exists('WPGettingStarted') ) :
             add_action ( 'submitpost_box', array ( &$this, 'add_wpgs_hidden_field' ) );
             add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 10, 2 );
 
-            // Change redirect after close in live preview (if active)
+            // Change redirect after close in Live Theme Preview (if active)
             add_action('wp_ltp_init', array ( &$this, 'change_ltp_close_redirect' ) );
+
             // Keep the flow if Live Theme Preview is activated
             add_filter ( 'wp_ltp_editurl', array ( &$this, 'add_wpgs_param' ) );
             add_filter ( 'wp_ltp_activateurl', array ( &$this, 'add_wpgs_param' ) );
 
             // But also ensure a nice flow without LTP...
             add_filter ( 'theme_action_links', array ( &$this, 'modify_theme_action_links' ), 10, 2 );
-            add_filter ( 'clean_url', array ( &$this, 'modify_theme_action_urls' ), 10, 2 );
+            add_filter ( 'clean_url', array ( &$this, 'modify_theme_action_urls' ) );
             add_action ( 'wp_redirect', array ( &$this, 'modify_switch_theme_redirect' ) );
 
         }
 
+        /**
+         * Makes Theme Customizer urls in themes.php carry over the wpgs param
+         *
+         * @param str $url
+         * @return str
+         * @since 0.1
+         */
         public function modify_theme_action_urls( $url ) {
             if ( $GLOBALS['current_screen']->id != 'themes' ) return $url;
             if ( strpos ( $url, 'customize.php' ) ) {
@@ -118,25 +131,55 @@ if ( ! class_exists('WPGettingStarted') ) :
             } else return $url;
         }
 
-        public function modify_theme_action_links( $actions, $theme ) {
+        /**
+         * Makes activation links carry the wpgs param
+         *
+         * @param array $actions
+         * @return array
+         * @since 0.1
+         */
+        public function modify_theme_action_links( $actions ) {
             $actions['activate'] = str_replace( 'themes.php?action=activate', 'themes.php?action=activate&wpgs=1', $actions['activate'] );
             return $actions;
         }
 
+        /**
+         * When a theme is activated, take us back to the dashboard
+         *
+         * @param str $location
+         * @return str $location
+         */
         public function modify_switch_theme_redirect( $location ) {
             if ( strpos ( $location, 'themes.php?activated=true' ) )
                 return admin_url('index.php?wpgs_action=theme_activated');
             else return $location;
         }
 
+        /**
+         * Add wpgs=1 to any URL
+         *
+         * @param str $url
+         * @return str
+         * @since 0.1
+         */
         public function add_wpgs_param ( $url ) {
             return add_query_arg( 'wpgs', '1', $url );
         }
 
+        /**
+         * Print hidden wpgs field
+         *
+         * @since 0.1
+         */
         public function add_wpgs_hidden_field () {
             echo "<input type='hidden' name='wpgs' value=1>";
         }
 
+        /**
+         * A bit hackishly change the redirect when an unactivated theme is being saved and activated in theme customizer
+         *
+         * @since 0.1
+         */
         public function change_customizer_activate_redirect() {
             echo
                 "
@@ -146,16 +189,36 @@ if ( ! class_exists('WPGettingStarted') ) :
                 ";
         }
 
+        /**
+         * Change redirect on 'Close' in Theme Customizer
+         *
+         * @global str $return
+         * @global WP_Customize $wp_customize
+         * @since 0.1
+         */
         public function change_customizer_close_redirect() {
             global $return, $wp_customize;
             $return = ( $wp_customize->is_theme_active() ) ? admin_url('index.php') : admin_url('themes.php?live=1&wpgs=1');
         }
 
+        /**
+         * Change redirect on 'Close' in Live Theme Preview
+         *
+         * @global str $return
+         * @since 0.1
+         */
         public function change_ltp_close_redirect() {
             global $return;
             $return = admin_url('index.php');
         }
 
+        /**
+         * Redirect back to dashboard after saving new post or page
+         *
+         * @param str $location
+         * @param int $postid
+         * @since 0.1
+         */
         public function redirect_post_dashboard( $location, $postid ) {
             if (isset($_POST['save']) || isset($_POST['publish'])) {
                 if (preg_match("/post=([0-9]*)/", $location, $match)) {
@@ -168,6 +231,11 @@ if ( ! class_exists('WPGettingStarted') ) :
 
         }
 
+        /**
+         * Hook into the WP Welcome Panel
+         *
+         * @since 0.1
+         */
         protected function set_welcome_panel() {
             remove_action( 'welcome_panel', 'wp_welcome_panel' );
             add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
@@ -179,11 +247,21 @@ if ( ! class_exists('WPGettingStarted') ) :
                 add_action ( 'admin_notices', array ( &$this, 'admin_notice' ) );
         }
 
+        /**
+         * Styles for the welcome panel
+         *
+         * @since 0.1
+         */
         public function enqueue_welcome_style() {
             if ( $GLOBALS['current_screen']->id == 'dashboard' )
                 wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
         }
 
+        /**
+         * Show admin notice at the Dashboard
+         *
+         * @since 0.1
+         */
         public function admin_notice() {
             $action = $_GET['wpgs_action'];
 
@@ -202,11 +280,23 @@ if ( ! class_exists('WPGettingStarted') ) :
             printf( '<div class="updated"> <p> %s </p> </div>', __ ( $message, 'wp-gettings-started' ) );
         }
 
+        /**
+         * Loader for pointers
+         *
+         * @since 0.1
+         */
         public function set_pointers() {
             $this->dashboard_pointers();
             if ( $this->walkthrough ) $this->walkthrough_pointers();
         }
 
+        /**
+         * Pointer(s) shown on the dashboard
+         *
+         * Only shown to users that have not modified their install yet. It's the only pointer that shows not following a link of WPGS (this is the starting point after all).
+         *
+         * @since 0.1
+         */
         public function dashboard_pointers() {
             if ( $this->complete < 1 ) {
                 $pointers = array(
@@ -242,6 +332,11 @@ if ( ! class_exists('WPGettingStarted') ) :
             new WP_Help_Pointer($pointers);
         }
 
+        /**
+         * Pointers for the walkthrough
+         *
+         * @since 0.1
+         */
         public function walkthrough_pointers() {
             $pointers = array(
                             array(
@@ -282,6 +377,13 @@ if ( ! class_exists('WPGettingStarted') ) :
             new WP_Help_Pointer( $pointers );
         }
 
+        /**
+         * Boolean check if the theme is chosen
+         *
+         * @global str $wp_version
+         * @return boolean
+         * @since 0.1
+         */
         protected function is_theme_chosen() {
             global $wp_version;
             if ( floatval ( $wp_version ) >= 3.5 )
@@ -289,6 +391,12 @@ if ( ! class_exists('WPGettingStarted') ) :
             else return ( get_stylesheet() != "twentyeleven" );
         }
 
+        /**
+         * Boolean check if theme is customized
+         *
+         * @return boolean
+         * @since 0.1
+         */
         protected function is_theme_customized() {
             $options = get_option( "theme_mods_" . get_stylesheet() );
 
@@ -300,17 +408,36 @@ if ( ! class_exists('WPGettingStarted') ) :
             return false;
         }
 
+        /**
+         * Boolean check if site has pages
+         *
+         * @return boolean
+         * @since 0.1
+         */
         protected function site_has_pages() {
             $pages = get_posts( array( 'numberposts' => 1, 'exclude' => array ( 2 ), 'post_type' => 'page' ) );
             return ( ! empty ( $pages ) );
         }
 
+        /**
+         * Boolean check if site has posts
+         *
+         * @return boolean
+         * @since 0.1
+         */
         protected function site_has_posts() {
             $posts = get_posts( array( 'numberposts' => 1, 'exclude' => array ( 1 ) ) );
             return ( ! empty ( $posts ) );
         }
 
 
+        /**
+         * Renders the instruction panel, after the welcome panel
+         *
+         * @uses do_action 'wpgs_before_instuction_panel'
+         * @uses do_action 'wpgs_after_instuction_panel'
+         * @since 0.1
+         */
         public function the_instruction_panel() {
             do_action ('wpgs_before_instuction_panel');
             ?>
@@ -380,6 +507,13 @@ if ( ! class_exists('WPGettingStarted') ) :
             do_action ('wpgs_after_instuction_panel');
         }
 
+        /**
+         * Sets class vars
+         *
+         * @uses apply_filters 'wpgs_progress'
+         * @uses apply_filters 'wpgs_walkthrough'
+         * @since 0.1
+         */
         protected function set_current_state() {
             $this->progress = apply_filters ( 'wpgs_progress', array(
                 "theme_chosen"      => ( $this->is_theme_chosen() ) ? true : false,
@@ -401,6 +535,13 @@ if ( ! class_exists('WPGettingStarted') ) :
             $this->walkthrough = apply_filters ( 'wpgs_walkthrough', ( isset ( $_REQUEST['wpgs'] ) && $_REQUEST['wpgs'] == true ) );
         }
 
+        /**
+         * The Welcome Panel
+         *
+         * @uses do_action 'wp_before_welcome_panel'
+         * @uses do_action 'wp_after_welcome_panel'
+         * @since 0.1
+         */
         public function the_welcome_panel() {
             do_action( 'wp_before_welcome_panel');
             ?>
@@ -489,6 +630,11 @@ if ( ! class_exists('WPGettingStarted') ) :
             <?php
         }
 
+        /**
+         * Print the arrow, dark for next step, light for 'not yet'
+         *
+         * @param int $which
+         */
         private function print_arrow ( $which = 0 ) {
             ?>
             <div class="welcome-progression-block">

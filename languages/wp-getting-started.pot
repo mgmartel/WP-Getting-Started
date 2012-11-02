@@ -1,0 +1,251 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Getting Started v0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2012-11-02 15:52:46+0000\n"
+"Last-Translator: Mike <mike@trenvo.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: English\n"
+"X-Poedit-Country: UNITED STATES\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-Bookmarks: \n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Textdomain-Support: yes"
+
+#: lib/class.wp-help-pointers.php:72
+#@ plugindomain
+msgid "title"
+msgstr ""
+
+#: lib/class.wp-help-pointers.php:73
+#@ plugindomain
+msgid "content"
+msgstr ""
+
+#: wp-getting-started.php:273
+#, php-format
+#@ default
+msgid "Page published. <a href=\"%s\">View page</a>"
+msgstr ""
+
+#: wp-getting-started.php:275
+#, php-format
+#@ default
+msgid "Post published. <a href=\"%s\">View post</a>"
+msgstr ""
+
+#: wp-getting-started.php:278
+#, php-format
+#@ default
+msgid "Settings saved and theme activated. <a href=\"%s\">Visit site</a>"
+msgstr ""
+
+#: wp-getting-started.php:307
+#@ default
+msgid "Dashboard"
+msgstr ""
+
+#: wp-getting-started.php:308
+#@ default
+msgid "Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner."
+msgstr ""
+
+#: wp-getting-started.php:308
+#@ wp-getting-started
+msgid "You can always return to this screen by clicking the Dashboard icon above."
+msgstr ""
+
+#: wp-getting-started.php:346
+#: wp-getting-started.php:477
+#: wp-getting-started.php:614
+#@ default
+#@ wp-getting-started
+msgid "Posts"
+msgstr ""
+
+#: wp-getting-started.php:347
+#@ wp-getting-started
+msgid "Posts are what make your blog a blog - they're servings of content, similar to journal entries, listed in reverse chronological order. Posts can be as short or as long as you like; some are as brief as Twitter updates, while others are the length of essays."
+msgstr ""
+
+#: wp-getting-started.php:357
+#: wp-getting-started.php:472
+#: wp-getting-started.php:600
+#@ default
+#@ wp-getting-started
+msgid "Pages"
+msgstr ""
+
+#: wp-getting-started.php:358
+#@ wp-getting-started
+msgid "Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections. You can edit them any time."
+msgstr ""
+
+#: wp-getting-started.php:368
+#@ default
+msgid "Themes"
+msgstr ""
+
+#: wp-getting-started.php:369
+#@ wp-getting-started
+msgid "Aside from the default theme included with your WordPress installation, themes are designed and developed by third parties. Use the 'Appearance' menu to change your theme. You can change and customize your themes at any time."
+msgstr ""
+
+#: wp-getting-started.php:449
+#@ wp-getting-started
+msgid "Congratulations!"
+msgstr ""
+
+#: wp-getting-started.php:450
+#@ wp-getting-started
+msgid "Your new website is now up and running."
+msgstr ""
+
+#: wp-getting-started.php:455
+#@ wp-getting-started
+msgid "To get started, follow the easy steps above."
+msgstr ""
+
+#: wp-getting-started.php:460
+#@ wp-getting-started
+msgid "If things are ever unclear, use the 'Help' button in top-right corner."
+msgstr ""
+
+#: wp-getting-started.php:466
+#@ wp-getting-started
+msgid "Posts and pages"
+msgstr ""
+
+#: wp-getting-started.php:467
+#@ wp-getting-started
+msgid "Now that your website has a unique look, you need some content."
+msgstr ""
+
+#: wp-getting-started.php:468
+#@ wp-getting-started
+msgid "There's an important difference between pages and posts. Please read the descriptions here, or read further under the help tab."
+msgstr ""
+
+#: wp-getting-started.php:473
+#@ wp-getting-started
+msgid "Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections."
+msgstr ""
+
+#: wp-getting-started.php:478
+#@ wp-getting-started
+msgid "Posts are entries listed in reverse chronological order on the blog home page or on the posts page."
+msgstr ""
+
+#: wp-getting-started.php:484
+#@ wp-getting-started
+msgid "Compeleted!"
+msgstr ""
+
+#: wp-getting-started.php:485
+#@ wp-getting-started
+msgid "You have now set up your website and learned how to manage it."
+msgstr ""
+
+#: wp-getting-started.php:486
+#, php-format
+#@ wp-getting-started
+msgid "Click '%s' to close this panel and start using your website. You can always reopen it by selecting 'Screen Options' and then 'Welcome'."
+msgstr ""
+
+#: wp-getting-started.php:487
+#@ default
+msgid "Dismiss"
+msgstr ""
+
+#: wp-getting-started.php:492
+#@ wp-getting-started
+msgid "Help"
+msgstr ""
+
+#: wp-getting-started.php:493
+#@ wp-getting-started
+msgid "Remember that you can always consult the 'Help' tab at the top of the screen, to find out more about the screen you are currently viewing."
+msgstr ""
+
+#: wp-getting-started.php:497
+#@ wp-getting-started
+msgid "Useful links"
+msgstr ""
+
+#: wp-getting-started.php:499
+#@ default
+msgid "View your site"
+msgstr ""
+
+#: wp-getting-started.php:499
+#@ default
+msgid "Add image/media"
+msgstr ""
+
+#: wp-getting-started.php:500
+#@ default
+msgid "Add/remove widgets"
+msgstr ""
+
+#: wp-getting-started.php:501
+#@ default
+msgid "Edit your navigation menu"
+msgstr ""
+
+#: wp-getting-started.php:549
+#@ default
+msgid "Welcome to WordPress!"
+msgstr ""
+
+#: wp-getting-started.php:550
+#@ default
+msgid "We&#8217;ve assembled some links to get you started:"
+msgstr ""
+
+#: wp-getting-started.php:555
+#@ wp-getting-started
+msgid "Website"
+msgstr ""
+
+#: wp-getting-started.php:561
+#@ wp-getting-started
+msgid "Setup your website"
+msgstr ""
+
+#: wp-getting-started.php:570
+#@ wp-getting-started
+msgid "Theme"
+msgstr ""
+
+#: wp-getting-started.php:578
+#@ wp-getting-started
+msgid "Change"
+msgstr ""
+
+#: wp-getting-started.php:584
+#@ wp-getting-started
+msgid "or"
+msgstr ""
+
+#: wp-getting-started.php:591
+#@ default
+msgid "Customize"
+msgstr ""
+
+#: wp-getting-started.php:606
+#@ wp-getting-started
+msgid "Add some pages to your website"
+msgstr ""
+
+#: wp-getting-started.php:619
+#@ wp-getting-started
+msgid "Create your first blog entry"
+msgstr ""
+

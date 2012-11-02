@@ -203,24 +203,41 @@ if ( ! class_exists('WPGettingStarted') ) :
         }
 
         public function set_pointers() {
-            if ( $this->complete < 1 ) $this->dashboard_pointers();
+            $this->dashboard_pointers();
             if ( $this->walkthrough ) $this->walkthrough_pointers();
         }
 
         public function dashboard_pointers() {
-            $pointers = array(
-                array(
-                    'id' => 'wpgs_dash',
-                    'screen' => 'dashboard',
-                    'target' => '#menu-dashboard',
-                    'title' => __ ( 'Dashboard' ),
-                    'content' => __( 'Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner.' ) . "</p><p>" . __ ( "You can always return to this screen by clicking the Dashboard icon above.", 'wp-getting-started' ),
-                    'position' => array(
-                            'edge' => 'top',
-                            'align' => 'top'
+            if ( $this->complete < 1 ) {
+                $pointers = array(
+                    array(
+                        'id' => 'wpgs_dash',
+                        'screen' => 'dashboard',
+                        'target' => '#menu-dashboard',
+                        'title' => __ ( 'Dashboard' ),
+                        'content' => __( 'Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner.' ) . "</p><p>" . __ ( "You can always return to this screen by clicking the Dashboard icon above.", 'wp-getting-started' ),
+                        'position' => array(
+                                'edge' => 'top',
+                                'align' => 'top'
+                            )
                         )
-                    )
-                );
+                    );
+            /*} elseif ( $this->completed_all ) {
+                 $pointers = array(
+                    array(
+                        'id' => 'wpgs_help',
+                        'screen' => 'dashboard',
+                        'target' => '#welcome-panel h3',
+                        'title' => __ ( 'Complete!' ),
+                        'content' => __ ( "You have now set up your website and learned how to manage it. Remember that you can always look up information using the 'Help' tab here.", 'wp-getting-started' ),
+                        'position' => array(
+                                'edge' => 'top',
+                                'align' => 'left'
+                            )
+                        )
+                    );*/
+            } else return;
+
             $pointers = apply_filters( 'wpgs_dashboard_pointers', $pointers );
             new WP_Help_Pointer($pointers);
         }
@@ -339,12 +356,14 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <div class="welcome-panel-column">
                     <h4><?php _e( 'Compeleted!', 'wp-getting-started' ); ?></h4>
                     <p><?php _e( 'You have now set up your website and learned how to manage it.', 'wp-getting-started' ); ?></p>
-                    <p><?php _e( "Click 'Dismiss' to close this panel and start using your website. You can always reopen it by selecting 'Screen Options' and then 'Welcome'.", 'wp-getting-started' ); ?></p>
+                    <p><?php printf ( __( "Click '%s' to close this panel and start using your website. You can always reopen it by selecting 'Screen Options' and then 'Welcome'.", 'wp-getting-started' ),
+                            "<a class='welcome-panel-close' href='" . esc_url( admin_url( '?welcome=0' ) ) . "'>" .  __( 'Dismiss' ) . "</a>" ); ?>
+                    </p>
                 </div>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Pages', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( 'Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections.', 'wp-getting-started' ); ?></p>
+                    <h4><?php _e( 'Help', 'wp-getting-started' ); ?></h4>
+                    <p><?php _e( "Remember that you can always consult the 'Help' tab at the top of the screen, to find out more about the screen you are currently viewing.", 'wp-getting-started' ); ?></p>
                 </div>
 
                 <div class="welcome-panel-column">
@@ -481,5 +500,4 @@ if ( ! class_exists('WPGettingStarted') ) :
     }
 
     add_action('admin_init', array('WPGettingStarted', 'init'));
-    //if ( is_admin() ) WPGettingStarted::init();
 endif;

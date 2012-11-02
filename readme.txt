@@ -1,91 +1,76 @@
 === Plugin Name ===
 Contributors: Mike_Cowobo
 Donate link: http://trenvo.com/
-Tags:
-Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+Tags: walkthrough, welcome panel, help, getting started, multisite, beginners, easy, simple, admin
+Requires at least: 3.4.2
+Tested up to: 3.5beta2
+Stable tag: 0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Getting Started Wizard replacement for the Welcome Panel in WordPress
+Replace WordPress' Welcome Panel with a simple but effective walkthrough
 
 == Description ==
 
-None yet.
+WP Getting Started replaces the WordPress Welcome Panel (the one you see on the Dashboard after a fresh WP installation) with a simple 4 step walkthrough: choose and/or customize your theme, add pages and add posts.
+
+At every page in the walkthrough, users get a short explanation of what they are doing - for example what the difference between a page and a post is. When they have completed a step, they are automatically taken back to the walkthrough on the Dashboard.
+
+WP Getting Started is fully compatible with multisite networks, to give new users a pleasant introduction to the WordPress admin interface, and is no more intrusive than the original Welcome Panel in WordPress.
+
+This plugin is fully compatible with [Live Theme Preview](http://wordpress.org/extend/plugins/live-theme-preview/), a drop-in replacement for WordPress' native Themes interface.
+
+*This plugin is only freshly released, so use with care. Please leave any comments, bugs or suggestion in the Support section of the plugin page!*
+
+*If you want to help develop this plugin, visit the [GitHub repo](https://github.com/mgmartel/WP-Getting-Started).*
+
+= Features =
+* Multisite compatible
+* Easily extendible through hooks and actions
+* Internationalized
+* Non intrusive - one click to dismiss
+* Big Icons, Single Workflow
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+1. Go to your WordPress Dashboard at yoursite.com/wp-admin.
+1. Then go to Plugins > Add New and search for "WP Getting Started"
+1. This plugin should show up in the results, click "Install Now" under the name
+1. Click on "Activate" in the next screen
 
-e.g.
-
-1. Upload `plugin-name.php` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('plugin_name_hook'); ?>` in your templates
+This plugin needs no configuration - just go to your Dashboard and follow the instructions!
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Can I add my own texts to this plugin? =
 
-An answer to that question.
+Yes. There is no configuration panel (yet?), but the easiest way to do it would be to make a translation file (which can be in English still, of course) using PoEdit or CodeStyling Localization.
 
-= What about foo bar? =
+Then load the textdomain (in a plugin or your `functions.php`):
 
-Answer to foo bar dilemma.
+`load_textdomain( 'wp-getting-started', ABSOLUTE_PATH_TO_TRANSLATION_FILE );`
+
+= Why doesn't this plugin also... =
+
+This plugin isn't there yet, look at the version number. If you have any suggestions, please let me know via email or the support forum of this plugin.
+
+Or better yet, contribute to the [GitHub repo](https://github.com/mgmartel/WP-Getting-Started)!
+
+= I think the texts you have put in are a bit strange, why isn't it ... =
+
+See the above..
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. Welcome to WordPress
+2. A bit further down the road. Description under the big icons changes according the the steps already completed.
+3. WP Getting Started contains a few pointers about the admin screens in WordPress
 
 == Changelog ==
 
-= 1.0 =
-* A change since the previous version.
-* Another change.
+= 0.1 =
+* First version.
 
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+== Other Notes ==
 
-== Upgrade Notice ==
-
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
-
-== Arbitrary section ==
-
-You may provide arbitrary sections, in the same format as the ones above.  This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation."  Arbitrary sections will be shown below the built-in sections outlined above.
-
-== A brief Markdown Example ==
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
-Titles are optional, naturally.
-
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
-            "Markdown is what the parser uses to process much of the readme file"
-
-Markdown uses email style notation for blockquotes and I've been told:
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-`<?php code(); // goes in backticks ?>`
+The icons used in WP Getting Started come from the ["Google Plus Interface Icons"](http://www.designshock.com/google-plus-interface-icons/) icon pack by Design Shock, free for personal or commercial use. Original license file is included with the plugin.

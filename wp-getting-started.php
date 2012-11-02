@@ -39,10 +39,9 @@ if ( ! class_exists('WPGettingStarted') ) :
     class WPGettingStarted    {
 
         protected $complete = 0;
-        protected $walkthrough;
-        protected $progress;
-        protected $dashboard_pointers;
-        protected $walkthough_pointers;
+        protected $completed_all = false;
+        protected $walkthrough = false;
+        protected $progress = array();
 
         /**
          * Creates an instance of the WPGettingStarted class
@@ -197,7 +196,8 @@ if ( ! class_exists('WPGettingStarted') ) :
                         )
                     )
                 );
-            $this->dashboard_pointers = new WP_Help_Pointer($pointers);
+            $pointers = apply_filters( 'wpgs_dashboard_pointers', $pointers );
+            new WP_Help_Pointer($pointers);
         }
 
         public function walkthrough_pointers() {
@@ -225,7 +225,8 @@ if ( ! class_exists('WPGettingStarted') ) :
                                     )
                                 ),
                              );
-            $this->walkthrough_pointers = new WP_Help_Pointer($pointers);
+            $pointers = apply_filters( 'wpgs_walkthrough_pointers', $pointers );
+            new WP_Help_Pointer($pointers);
         }
 
         protected function is_theme_chosen() {
@@ -279,7 +280,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                     <p><?php _e( 'If things are ever unclear, use the \'Help\' button in top-right corner.', 'wp-getting-started' ); ?></p>
                 </div>
 
-            <?php elseif ( $this->complete < 4 ) : ?>
+            <?php elseif ( ! $this->completed_all ) : ?>
 
                 <div class="welcome-panel-column">
                     <h4><?php _e( 'Posts and pages', 'wp-getting-started' ); ?></h4>
@@ -297,7 +298,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                     <p><?php _e( 'Posts are entries listed in reverse chronological order on the blog home page or on the posts page.', 'wp-getting-started' ); ?></p>
                 </div>
 
-            <?php elseif ( $this->complete == 4 ) : ?>
+            <?php else : ?>
 
                 <div class="welcome-panel-column">
                     <h4><?php _e( 'Compeleted!', 'wp-getting-started' ); ?></h4>
@@ -335,21 +336,20 @@ if ( ! class_exists('WPGettingStarted') ) :
 
             $i = 0;
             foreach ( $this->progress as $prog ) {
-                if ( $prog ) {
+                if ( $prog )
                     $this->complete = $i;
-                }
                 $i++;
             }
+
+            $this->completed_all = ( $this->progress['theme_edited'] && $this->progress['has_pages'] && $this->progress['has_posts'] );
 
             $this->walkthrough = apply_filters ( 'wpgs_walkthrough', ( isset ( $_REQUEST['wpgs'] ) && $_REQUEST['wpgs'] == true ) );
         }
 
         public function the_welcome_panel() {
-            //wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
-
             do_action( 'wp_before_welcome_panel');
             ?>
-            <div class="welcome-panel-content<?php if ( $this->complete == 4 ) echo " completed"; ?>">
+            <div class="welcome-panel-content<?php if ( $this->completed_all ) echo " completed"; ?>">
             <h3><?php _e( 'Welcome to WordPress!' ); ?></h3>
             <p class="about-description"><?php _e( 'We&#8217;ve assembled some links to get you started:' ); ?></p>
             <div class="welcome-panel-column-container">

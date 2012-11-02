@@ -20,6 +20,8 @@ WP Getting Started is fully compatible with multisite networks, to give new user
 
 This plugin is fully compatible with [Live Theme Preview](http://wordpress.org/extend/plugins/live-theme-preview/), a drop-in replacement for WordPress' native Themes interface.
 
+This plugin only works with WordPress version 3.4 or later.
+
 *This plugin is only freshly released, so use with care. Please leave any comments, bugs or suggestion in the Support section of the plugin page!*
 
 *If you want to help develop this plugin, visit the [GitHub repo](https://github.com/mgmartel/WP-Getting-Started).*

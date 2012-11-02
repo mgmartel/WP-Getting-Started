@@ -226,9 +226,20 @@ if ( ! class_exists('WPGettingStarted') ) :
                                         'align' => 'top'
                                     )
                                 ),
+                            array(
+                                'id' => 'wpgs_theme',
+                                'screen' => 'themes',
+                                'target' => '#menu-appearance',
+                                'title' => __ ( 'Themes' ),
+                                'content' => __ ( "Aside from the default theme included with your WordPress installation, themes are designed and developed by third parties. Use the 'Appearance' menu to change your theme. You can change and customize your themes at any time.", 'wp-getting-started' ),
+                                'position' => array(
+                                        'edge' => 'top',
+                                        'align' => 'top'
+                                    )
+                                ),
                              );
             $pointers = apply_filters( 'wpgs_walkthrough_pointers', $pointers );
-            new WP_Help_Pointer($pointers);
+            new WP_Help_Pointer( $pointers );
         }
 
         protected function is_theme_chosen() {

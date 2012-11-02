@@ -38,6 +38,10 @@ if ( ! class_exists('WPGettingStarted') ) :
     class WPGettingStarted    {
 
         protected $complete = 0;
+        protected $walkthrough;
+        protected $progress;
+        protected $dashboard_pointers;
+        protected $walkthough_pointers;
 
         /**
          * Creates an instance of the WPGettingStarted class
@@ -63,11 +67,13 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         public function __construct() {
-            remove_action( 'welcome_panel', 'wp_welcome_panel' );
-            add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
-            add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
+            $this->set_current_state();
+            $this->set_welcome_panel();
 
-            add_action   ( 'admin_enqueue_scripts', array ( &$this, 'pointers' ) );
+            if ( $this->walkthrough )
+                $this->walkthrough_workflow();
+
+            add_action ( 'admin_enqueue_scripts', array ( &$this, 'set_pointers' ) );
         }
 
             /**
@@ -79,19 +85,74 @@ if ( ! class_exists('WPGettingStarted') ) :
                 $this->__construct();
             }
 
-        public function pointers() {
+        protected function walkthrough_workflow() {
+            // Change redirect after save and activate in customizer
+            add_action ('customize_controls_print_footer_scripts', array ( &$this, 'change_customizer_activate_redirect' ) );
+
+            // Change redirect after close in customizer
+            add_action('customize_controls_init', array ( &$this, 'change_customizer_close_redirect' ) );
+
+            // Change redirect after close in live preview (if active)
+            add_action('wp_ltp_init', array ( &$this, 'change_ltp_close_redirect' ) );
+
+            // Keep the flow if Live Theme Preview is activated
+            add_filter ( 'wp_ltp_editurl', array ( &$this, 'add_wpgs_param' ) );
+            add_filter ( 'wp_ltp_activateurl', array ( &$this, 'add_wpgs_param' ) );
+        }
+
+        public function add_wpgs_param ( $url ) {
+            return add_query_arg( 'wpgs', '1', $url );
+        }
+
+        public function change_customizer_activate_redirect() {
+            echo
+                "
+                <script>
+                    setTimeout('_wpCustomizeSettings.url.activated = \"" . admin_url('index.php?activated=true&previewed') ."\";', 50);
+                </script>
+                ";
+        }
+
+        public function change_customizer_close_redirect() {
+            global $return, $wp_customize;
+            $return = ( $wp_customize->is_theme_active() ) ? admin_url('index.php') : admin_url('themes.php?live=1&wpgs=1');
+        }
+
+        public function change_ltp_close_redirect() {
+            global $return;
+            $return = admin_url('index.php');
+        }
+
+        protected function set_welcome_panel() {
+            remove_action( 'welcome_panel', 'wp_welcome_panel' );
+            add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
+            add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
+        }
+
+        public function set_pointers() {
+            if ( $this->complete < 1 ) $this->dashboard_pointers();
+            if ( $this->walkthrough ) $this->walkthrough_pointers();
+        }
+
+        public function dashboard_pointers() {
             $pointers = array(
-                            array(
-                                'id' => 'wpgs_dash',
-                                'screen' => 'dashboard',
-                                'target' => '#menu-dashboard',
-                                'title' => __ ( 'Dashboard' ),
-                                'content' => __( 'Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner.' ) . "</p><p>" . __ ( "You can always return to this screen by clicking the Dashboard icon above.", 'wp-getting-started' ),
-                                'position' => array(
-                                        'edge' => 'top',
-                                        'align' => 'top'
-                                    )
-                                ),
+                array(
+                    'id' => 'wpgs_dashb',
+                    'screen' => 'dashboard',
+                    'target' => '#menu-dashboard',
+                    'title' => __ ( 'Dashboard' ),
+                    'content' => __( 'Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner.' ) . "</p><p>" . __ ( "You can always return to this screen by clicking the Dashboard icon above.", 'wp-getting-started' ),
+                    'position' => array(
+                            'edge' => 'top',
+                            'align' => 'top'
+                        )
+                    )
+                );
+            $this->dashboard_pointers = new WP_Help_Pointer($pointers);
+        }
+
+        public function walkthrough_pointers() {
+            $pointers = array(
                             array(
                                 'id' => 'wpgs_post',
                                 'screen' => 'post',
@@ -115,7 +176,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                                     )
                                 ),
                              );
-            $this->pointers = new WP_Help_Pointer($pointers);
+            $this->walkthrough_pointers = new WP_Help_Pointer($pointers);
         }
 
         protected function is_theme_chosen() {
@@ -156,12 +217,8 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <div class="welcome-panel-column">
                     <h4><?php _e( 'Congratulations!', 'wp-getting-started' ); ?></h4>
                     <p><?php _e( 'Your new website is now up and running.', 'wp-getting-started' ); ?></p>
-
-                    <?php if ( current_user_can( 'install_themes' ) || ( current_user_can( 'switch_themes' ) && count( wp_get_themes( array( 'allowed' => true ) ) ) > 1 ) ) : ?>
-                        <a class="button-primary welcome-button" href="<?php echo admin_url( 'themes.php?live=1' ); ?>"><?php _e( 'Customize Your Site' ); ?></a>
-                    <?php endif; ?>
-
                 </div>
+
                 <div class="welcome-panel-column">
                     <h4>Next step</h4>
                     <p><?php _e( 'To get started, follow the easy steps above.', 'wp-getting-started' ); ?></p>
@@ -172,39 +229,30 @@ if ( ! class_exists('WPGettingStarted') ) :
                     <p><?php _e( 'If things are ever unclear, use the \'Help\' button in top-right corner.', 'wp-getting-started' ); ?></p>
                 </div>
 
-            <?php endif; ?>
-<?php /*
-            <div class="welcome-panel-column">
-                <h4><?php _e( 'Next Steps' ); ?></h4>
-                <ul>
-                <?php if ( 'page' == get_option( 'show_on_front' ) && ! get_option( 'page_for_posts' ) ) : ?>
-                    <li><?php printf( '<a href="%s">' . __( 'Edit your front page' ) . '</a>', get_edit_post_link( get_option( 'page_on_front' ) ) ); ?></li>
-                    <li><?php printf( '<a href="%s">' . __( 'Add additional pages' ) . '</a>', admin_url( 'post-new.php?post_type=page' ) ); ?></li>
-                <?php elseif ( 'page' == get_option( 'show_on_front' ) ) : ?>
-                    <li><?php printf( '<a href="%s">' . __( 'Edit your front page' ) . '</a>', get_edit_post_link( get_option( 'page_on_front' ) ) ); ?></li>
-                    <li><?php printf( '<a href="%s">' . __( 'Add additional pages' ) . '</a>', admin_url( 'post-new.php?post_type=page' ) ); ?></li>
-                    <li><?php printf( '<a href="%s">' . __( 'Add a blog post' ) . '</a>', admin_url( 'post-new.php' ) ); ?></li>
-                <?php else : ?>
-                    <li><?php printf( '<a href="%s">' . __( 'Write your first blog post' ) . '</a>', admin_url( 'post-new.php' ) ); ?></li>
-                    <li><?php printf( '<a href="%s">' . __( 'Add an About page' ) . '</a>', admin_url( 'post-new.php?post_type=page' ) ); ?></li>
-                <?php endif; ?>
-                    <li><?php printf( '<a href="%s">' . __( 'View your site' ) . '</a>', home_url( '/' ) ); ?></li>
-                </ul>
-            </div>
+            <?php elseif ( $this->complete < 4 ) : ?>
 
-            <div class="welcome-panel-column welcome-panel-last">
-                <h4><?php _e( 'Learn How To' ); ?></h4>
-                <ul>
-                    <li><?php printf( '<a id="wp350_add_images" href="%s">' . __( 'Add image/media' ) . '</a>', admin_url( 'media-new.php' ) ); ?></li>
-                    <li><?php printf( '<a id="wp350_widgets" href="%s">' . __( 'Add/remove widgets' ) . '</a>', admin_url( 'widgets.php' ) ); ?></li>
-                    <li><?php printf( '<a id="wp350_edit_menu" href="%s">' . __( 'Edit your navigation menu' ) . '</a>', admin_url( 'nav-menus.php' ) ); ?></li>
-                </ul>
-            </div>*/ ?>
+                <div class="welcome-panel-column">
+                    <h4><?php _e( 'Posts and pages', 'wp-getting-started' ); ?></h4>
+                    <p><?php _e( 'Now that your website has a unique look, you need some content.', 'wp-getting-started' ); ?></p>
+                    <p><?php _e( "There's an important difference between pages and posts. Please read the descriptions here, or read further under the help tab.", 'wp-getting-started' ); ?></p>
+                </div>
+
+                <div class="welcome-panel-column">
+                    <h4><?php _e( 'Pages', 'wp-getting-started' ); ?></h4>
+                    <p><?php _e( 'Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections.', 'wp-getting-started' ); ?></p>
+                </div>
+
+                <div class="welcome-panel-column">
+                    <h4><?php _e( 'Posts', 'wp-getting-started' ); ?></h4>
+                    <p><?php _e( 'Posts are entries listed in reverse chronological order on the blog home page or on the posts page.', 'wp-getting-started' ); ?></p>
+                </div>
+
+            <?php endif; ?>
             <?php
         }
 
-        public function the_welcome_panel() {
-            $progress = array(
+        protected function set_current_state() {
+            $this->progress = array(
                 "theme_chosen"      => ( $this->is_theme_chosen() ) ? true : false,
                 "theme_customized"  => ( $this->is_theme_customized() ) ? true : false,
                 "theme_edited"      => ( $this->is_theme_customized() || $this->is_theme_chosen() ) ? true : false,
@@ -213,15 +261,28 @@ if ( ! class_exists('WPGettingStarted') ) :
             );
 
             $i = 0;
-            foreach ( $progress as $prog ) {
+            foreach ( $this->progress as $prog ) {
                 if ( $prog ) {
                     $this->complete = $i;
                 }
                 $i++;
             }
 
+            $this->walkthrough = ( isset ( $_GET['wpgs'] ) && $_GET['wpgs'] == true );
+        }
+
+        public function the_welcome_panel() {
+
+
             ?>
             <style>
+                .welcome-panel .welcome-panel-column {
+                    width: 30%;
+                    min-width: 185px;
+                    float: left;
+                    padding-right: 15px;
+                }
+
                 div.welcome-progression-block {
                     display: inline-block;
                     vertical-align: middle;
@@ -280,10 +341,10 @@ if ( ! class_exists('WPGettingStarted') ) :
                     <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
                     <div class="welcome-progression-block">
 
-                        <a href="<?php echo admin_url( 'themes.php' ) . '?live=1'; ?>">
-                            <img src="<?php echo WPGS_IMAGES_URL . "change"; if ( ! $progress['theme_edited'] ) echo "_incomplete";  ?>.png">
+                        <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
+                            <img src="<?php echo WPGS_IMAGES_URL . "change"; if ( ! $this->progress['theme_edited'] ) echo "_incomplete";  ?>.png">
 
-                            <p<?php if ( $progress['theme_edited'] ) echo " class='completed'"; ?>><?php _e ( 'Change', 'wp-getting-started' ); ?></p>
+                            <p<?php if ( $this->progress['theme_edited'] ) echo " class='completed'"; ?>><?php _e ( 'Change', 'wp-getting-started' ); ?></p>
                         </a>
 
                     </div>
@@ -293,10 +354,10 @@ if ( ! class_exists('WPGettingStarted') ) :
                     </div>
 
                     <div class="welcome-progression-block">
-                        <a href="<?php echo wp_customize_url(); ?>">
-                            <img src="<?php echo WPGS_IMAGES_URL . "customize"; if ( ! $progress['theme_customized'] ) echo "_incomplete";  ?>.png">
+                        <a href="<?php echo wp_customize_url() . '?wpgs=1'; ?>">
+                            <img src="<?php echo WPGS_IMAGES_URL . "customize"; if ( ! $this->progress['theme_customized'] ) echo "_incomplete";  ?>.png">
 
-                            <p<?php if ( $progress['theme_customized'] ) echo " class='completed'"; ?>><?php _e( 'Customize' ); ?></p>
+                            <p<?php if ( $this->progress['theme_customized'] ) echo " class='completed'"; ?>><?php _e( 'Customize' ); ?></p>
                         </a>
                     </div>
                 </div>
@@ -306,10 +367,10 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <div class="welcome-progression-block">
                     <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
 
-                    <a href="<?php echo admin_url( 'post-new.php?post_type=page' ); ?>">
-                        <img src="<?php echo WPGS_IMAGES_URL . "pages"; if ( ! $progress['has_pages'] ) echo "_incomplete";  ?>.png">
+                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
+                        <img src="<?php echo WPGS_IMAGES_URL . "pages"; if ( ! $this->progress['has_pages'] ) echo "_incomplete";  ?>.png">
 
-                        <p<?php if ( $progress['has_pages'] ) echo " class='completed'"; ?>><?php _e( 'Add some pages to your website', 'wp-getting-started' ); ?></p>
+                        <p<?php if ( $this->progress['has_pages'] ) echo " class='completed'"; ?>><?php _e( 'Add some pages to your website', 'wp-getting-started' ); ?></p>
                     </a>
                 </div>
 
@@ -318,9 +379,9 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <div class="welcome-progression-block">
                     <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
 
-                    <a href="<?php echo admin_url( 'post-new.php' ); ?>">
-                        <img src="<?php echo WPGS_IMAGES_URL . "posts"; if ( ! $progress['has_posts'] ) echo "_incomplete";  ?>.png">
-                        <p<?php if ( $progress['has_posts'] ) echo " class='completed'"; ?>><?php _e( 'Create your first blog entry','wp-getting-started' ); ?></p>
+                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
+                        <img src="<?php echo WPGS_IMAGES_URL . "posts"; if ( ! $this->progress['has_posts'] ) echo "_incomplete";  ?>.png">
+                        <p<?php if ( $this->progress['has_posts'] ) echo " class='completed'"; ?>><?php _e( 'Create your first blog entry','wp-getting-started' ); ?></p>
                     </a>
                 </div>
 

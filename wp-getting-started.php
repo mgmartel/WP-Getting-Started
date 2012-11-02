@@ -2,7 +2,7 @@
 /*
   Plugin Name: WP Getting Started
   Plugin URI: http://trenvo.com
-  Description: Replaces WPs Welcome Panel with a simple step-by-step getting started screen
+  Description: Replace WordPress' Welcome Panel with a simple but effective walkthrough
   Version: 0.1
   Author: Mike Martel
   Author URI: http://trenvo.com
@@ -144,14 +144,14 @@ if ( ! class_exists('WPGettingStarted') ) :
         }
 
         /**
-         * When a theme is activated, take us back to the dashboard
+         * When a theme is activated, take our user to the customizer
          *
          * @param str $location
          * @return str $location
          */
         public function modify_switch_theme_redirect( $location ) {
             if ( strpos ( $location, 'themes.php?activated=true' ) )
-                return admin_url('index.php?wpgs_action=theme_activated');
+                return admin_url ( 'customize.php?wpgs=1' );
             else return $location;
         }
 
@@ -344,7 +344,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                                 'screen' => 'post',
                                 'target' => '#menu-posts',
                                 'title' => __ ( 'Posts' ),
-                                'content' => __ ( "Posts are what make your blog a blog — they’re servings of content, similar to journal entries, listed in reverse chronological order. Posts can be as short or as long as you like; some are as brief as Twitter updates, while others are the length of essays.", 'wp-getting-started' ),
+                                'content' => __ ( "Posts are what make your blog a blog - they're servings of content, similar to journal entries, listed in reverse chronological order. Posts can be as short or as long as you like; some are as brief as Twitter updates, while others are the length of essays.", 'wp-getting-started' ),
                                 'position' => array(
                                         'edge' => 'top',
                                         'align' => 'top'

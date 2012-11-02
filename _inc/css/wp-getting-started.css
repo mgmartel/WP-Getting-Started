@@ -5,6 +5,11 @@
     padding-right: 15px;
 }
 
+.welcome-panel .welcome-panel-column a.welcome-panel-close {
+    position:inherit;
+    padding:0;
+}
+
 div.welcome-progression-block {
     display: inline-block;
     vertical-align: middle;

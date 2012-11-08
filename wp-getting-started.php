@@ -1,11 +1,11 @@
 <?php
 /*
-  Plugin Name: WP Getting Started
-  Plugin URI: http://trenvo.com
-  Description: Replace WordPress' Welcome Panel with a simple but effective walkthrough
-  Version: 0.1
-  Author: Mike Martel
-  Author URI: http://trenvo.com
+Plugin Name: WP Getting Started
+Plugin URI: http://trenvo.com
+Description: Replace WordPress' Welcome Panel with a simple but effective walkthrough
+Version: 0.1
+Author: Mike Martel
+Author URI: http://trenvo.com
  */
 
 // Exit if accessed directly

@@ -16,7 +16,7 @@ WP Getting Started replaces the WordPress Welcome Panel (the one you see on the 
 
 At every page in the walkthrough, users get a short explanation of what they are doing - for example what the difference between a page and a post is. When they have completed a step, they are automatically taken back to the walkthrough on the Dashboard.
 
-WP Getting Started is fully compatible with multisite networks, to give new users a pleasant introduction to the WordPress admin interface, and is no more intrusive than the original Welcome Panel in WordPress.
+WP Getting Started is fully compatible with multisite networks, to give new users an easier introduction to the WordPress admin interface, and is no more intrusive than the original Welcome Panel in WordPress (further explanations only show up when the user follows the links from WP Getting Started).
 
 This plugin is fully compatible with [Live Theme Preview](http://wordpress.org/extend/plugins/live-theme-preview/), a drop-in replacement for WordPress' native Themes interface.
 
@@ -54,7 +54,7 @@ Then load the textdomain (in a plugin or your `functions.php`):
 
 = Why doesn't this plugin also... =
 
-This plugin isn't there yet, look at the version number. If you have any suggestions, please let me know via email or the support forum of this plugin.
+This plugin is still in its early stages, look at the version number. If you have any suggestions, please let me know via email or the support forum of this plugin.
 
 Or better yet, contribute to the [GitHub repo](https://github.com/mgmartel/WP-Getting-Started)!
 

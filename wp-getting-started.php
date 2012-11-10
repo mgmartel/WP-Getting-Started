@@ -101,7 +101,10 @@ if ( ! class_exists('WPGettingStarted') ) :
             // Return to dashboard after post
             add_action ( 'submitpage_box', array ( &$this, 'add_wpgs_hidden_field' ) );
             add_action ( 'submitpost_box', array ( &$this, 'add_wpgs_hidden_field' ) );
-            add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 10, 2 );
+            add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 20, 2 );
+
+            // Let WPGS play nice with BFEE
+            add_action ( 'bfee_new_post_redirect', array ( &$this, 'add_wpgs_param' ) );
 
             // Change redirect after close in Live Theme Preview (if active)
             add_action('wp_ltp_init', array ( &$this, 'change_ltp_close_redirect' ) );
@@ -544,6 +547,10 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function the_welcome_panel() {
             do_action( 'wp_before_welcome_panel');
+
+            $bfee = ( is_plugin_active ( 'back-to-front-end-editor/back-to-front-end-editor.php' ) ) ? '&bfee=1' : '';
+            $ltp = ( is_plugin_active ( 'live-theme-preview/live-theme-preview.php' ) ) ? '&live=1' : '';
+
             ?>
             <div class="welcome-panel-content<?php if ( $this->completed_all ) echo " completed"; ?>">
             <h3><?php _e( 'Welcome to WordPress!' ); ?></h3>
@@ -566,13 +573,13 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                 <div class="welcome-progression-block">
 
-                    <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
+                    <a href="<?php echo admin_url( 'themes.php?wpgs=1' . $ltp ); ?>">
                         <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
                     </a>
 
                     <div class="welcome-progression-block">
 
-                        <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
+                        <a href="<?php echo admin_url( 'themes.php?wpgs=1' . $ltp ); ?>">
                             <img src="<?php echo WPGS_IMAGES_URL . "change"; if ( ! $this->progress['theme_edited'] ) echo "_incomplete";  ?>.png">
 
                             <p<?php if ( $this->progress['theme_edited'] ) echo " class='completed'"; ?>><?php _e ( 'Change', 'wp-getting-started' ); ?></p>
@@ -596,11 +603,11 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <?php $this->print_arrow ( 2 ); ?>
 
                 <div class="welcome-progression-block">
-                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
+                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' . $bfee ); ?>">
                         <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
+                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' . $bfee ); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "pages"; if ( ! $this->progress['has_pages'] ) echo "_incomplete";  ?>.png">
 
                         <p<?php if ( $this->progress['has_pages'] ) echo " class='completed'"; ?>><?php _e( 'Add some pages to your website', 'wp-getting-started' ); ?></p>
@@ -610,11 +617,11 @@ if ( ! class_exists('WPGettingStarted') ) :
                 <?php $this->print_arrow ( 3 ); ?>
 
                 <div class="welcome-progression-block">
-                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
+                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' . $bfee ); ?>">
                         <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
+                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' . $bfee ); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "posts"; if ( ! $this->progress['has_posts'] ) echo "_incomplete";  ?>.png">
                         <p<?php if ( $this->progress['has_posts'] ) echo " class='completed'"; ?>><?php _e( 'Create your first blog entry','wp-getting-started' ); ?></p>
                     </a>

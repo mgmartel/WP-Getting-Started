@@ -17,7 +17,7 @@ if (!defined('ABSPATH'))
  *
  * @since 0.1
  */
-define('WPGS_VERSION', '0.1');
+define('WPGS_VERSION', '0.1.1');
 
 /**
  * PATHs and URLs

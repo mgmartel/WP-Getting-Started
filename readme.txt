@@ -4,7 +4,7 @@ Donate link: http://trenvo.com/
 Tags: walkthrough, welcome panel, help, getting started, multisite, beginners, easy, simple, admin
 Requires at least: 3.4.2
 Tested up to: 3.5beta2
-Stable tag: 0.1
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,9 @@ See the above..
 3. WP Getting Started contains a few pointers about the admin screens in WordPress
 
 == Changelog ==
+
+= 0.1.1 =
+* Minor update: Better integration with Live Theme Preview
 
 = 0.1 =
 * First version.

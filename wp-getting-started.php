@@ -198,7 +198,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function change_customizer_close_redirect() {
             global $return, $wp_customize;
-            $return = ( $wp_customize->is_theme_active() ) ? admin_url('index.php') : admin_url('themes.php?live=1&wpgs=1');
+            $return = ( $wp_customize->is_theme_active() ) ? admin_url('index.php') : admin_url('themes.php?live_themes=1&wpgs=1');
         }
 
         /**
@@ -614,7 +614,7 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                 <div class="welcome-progression-block welcome-progression-theme">
 
-                    <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
+                    <a href="<?php echo admin_url( 'themes.php?live_themes=1&wpgs=1' ); ?>">
                         <h2><?php echo $header . ". "; $header++; _e( 'Theme', 'wp-getting-started' ); ?></h2>
                     </a>
 
@@ -622,7 +622,7 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                     <div class="welcome-progression-block welcome-progression-choose">
 
-                        <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
+                        <a href="<?php echo admin_url( 'themes.php?live_themes=1&wpgs=1' ); ?>">
                             <img src="<?php echo WPGS_IMAGES_URL . "change"; if ( ! $this->progress['theme_edited'] ) echo "_incomplete";  ?>.png">
 
                             <p<?php if ( $this->progress['theme_edited'] ) echo " class='completed'"; ?>><?php _e ( 'Change', 'wp-getting-started' ); ?></p>

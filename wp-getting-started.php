@@ -542,7 +542,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                 $i++;
             }
 
-            $this->completed_all = ( $this->progress['theme_edited'] && $this->progress['has_pages'] && $this->progress['has_posts'] );
+            $this->completed_all = apply_filters( 'wpgs_completed_all', ( $this->progress['theme_edited'] && $this->progress['has_pages'] && $this->progress['has_posts'] ), $this->progress );
 
             $this->walkthrough = apply_filters ( 'wpgs_walkthrough', ( isset ( $_REQUEST['wpgs'] ) && $_REQUEST['wpgs'] == true ) );
         }

@@ -10,6 +10,10 @@
     padding:0;
 }
 
+div.welcome-panel-column-container.wp-getting-started {
+    text-align: center;
+}
+
 div.welcome-progression-block {
     display: inline-block;
     vertical-align: middle;

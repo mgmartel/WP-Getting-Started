@@ -586,7 +586,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             <div class="welcome-panel-content<?php if ( $this->completed_all ) echo " completed"; ?>">
             <h3><?php _e( 'Welcome to WordPress!' ); ?></h3>
             <p class="about-description"><?php _e( 'We&#8217;ve assembled some links to get you started:' ); ?></p>
-            <div class="welcome-panel-column-container">
+            <div class="welcome-panel-column-container wp-getting-started">
 
                 <div class="welcome-progression-block welcome-progression-welcome">
                     <?php // For some setups you just don't want your users to folow the first, so this is pluggable

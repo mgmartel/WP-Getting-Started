@@ -564,14 +564,10 @@ if ( ! class_exists('WPGettingStarted') ) :
         private function is_completed() {
             $completed = true;
 
-            if ( ! in_array ( 'theme_edited', $this->disabled_elements ) )
-                if ( ! $this->progress['theme_edited'] ) $completed = false;
-
-            if ( ! in_array ( 'has_pages', $this->disabled_elements ) )
-                if ( ! $this->progress['has_pages'] ) $completed = false;
-
-            if ( ! in_array ( 'has_posts', $this->disabled_elements ) )
-                if ( ! $this->progress['has_posts'] ) $completed = false;
+            foreach ( array ( 'theme_edited', 'has_pages', 'has_posts') as $$e ) {
+                if ( ! $this->is_disabled( $$e ) )
+                    if ( ! $this->progress[$$e] ) $completed = false;
+            }
 
             return apply_filters( 'wpgs_completed_all', $completed, $this );
         }
@@ -585,6 +581,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function the_welcome_panel() {
             do_action( 'wp_before_welcome_panel');
+            $header = 1;
             ?>
             <div class="welcome-panel-content<?php if ( $this->completed_all ) echo " completed"; ?>">
             <h3><?php _e( 'Welcome to WordPress!' ); ?></h3>
@@ -601,7 +598,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                     ?>
 
                     <a href="<?php echo $link ?>">
-                        <h2>1. <?php _e( 'Website', 'wp-getting-started' ); ?></h2>
+                        <h2><?php echo $header . ". "; $header++; _e( 'Website', 'wp-getting-started' ); ?></h2>
                     </a>
 
                     <a href="<?php echo $link ?>">
@@ -611,13 +608,17 @@ if ( ! class_exists('WPGettingStarted') ) :
                     </a>
                 </div>
 
+                <?php if ( ! $this->is_disabled('theme_edited') ) : ?>
+
                 <?php $this->print_arrow (); ?>
 
                 <div class="welcome-progression-block welcome-progression-theme">
 
                     <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
-                        <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
+                        <h2><?php echo $header . ". "; $header++; _e( 'Theme', 'wp-getting-started' ); ?></h2>
                     </a>
+
+                    <?php if ( ! $this->is_disabled('theme_chosen') ) : ?>
 
                     <div class="welcome-progression-block welcome-progression-choose">
 
@@ -629,9 +630,17 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                     </div>
 
+                    <?php endif; ?>
+
+                    <?php if ( ! $this->is_disabled('theme_chosen') && ! $this->is_disabled('theme_customized') ) : ?>
+
                     <div class="welcome-progression-block separate">
                         <h2><?php _e( 'or', 'wp-getting-started' ); ?></h2>
                     </div>
+
+                    <?php endif; ?>
+
+                    <?php if ( ! $this->is_disabled('theme_customized') ) : ?>
 
                     <div class="welcome-progression-block welcome-progression-customize">
                         <a href="<?php echo wp_customize_url() . '?wpgs=1'; ?>">
@@ -640,13 +649,20 @@ if ( ! class_exists('WPGettingStarted') ) :
                             <p<?php if ( $this->progress['theme_customized'] ) echo " class='completed'"; ?>><?php _e( 'Customize' ); ?></p>
                         </a>
                     </div>
+
+                    <?php endif; ?>
+
                 </div>
+
+                <?php endif; ?>
+
+                <?php if ( ! $this->is_disabled('has_pages') ) : ?>
 
                 <?php $this->print_arrow ( 2 ); ?>
 
                 <div class="welcome-progression-block welcome-progression-pages">
                     <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
-                        <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
+                        <h2><?php echo $header . ". "; $header++; _e( 'Pages', 'wp-getting-started' ); ?></h2>
                     </a>
 
                     <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
@@ -656,11 +672,15 @@ if ( ! class_exists('WPGettingStarted') ) :
                     </a>
                 </div>
 
+                <?php endif; ?>
+
+                <?php if ( ! $this->is_disabled('has_posts') ) : ?>
+
                 <?php $this->print_arrow ( 3 ); ?>
 
                 <div class="welcome-progression-block welcome-progression-posts">
                     <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
-                        <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
+                        <h2><?php echo $header . ". "; $header++; _e ( 'Posts', 'wp-getting-started' ); ?></h2>
                     </a>
 
                     <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
@@ -668,6 +688,8 @@ if ( ! class_exists('WPGettingStarted') ) :
                         <p<?php if ( $this->progress['has_posts'] ) echo " class='completed'"; ?>><?php _e( 'Create your first blog entry','wp-getting-started' ); ?></p>
                     </a>
                 </div>
+
+                <?php endif; ?>
 
             </div>
 
@@ -677,6 +699,10 @@ if ( ! class_exists('WPGettingStarted') ) :
             </div>
 
             <?php
+        }
+
+        private function is_disabled ( $e ) {
+            return ( in_array ( $e, $this->disabled_elements ) );
         }
 
         /**

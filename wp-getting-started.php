@@ -524,6 +524,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          *
          * @uses apply_filters 'wpgs_progress'
          * @uses apply_filters 'wpgs_walkthrough'
+         * @uses apply_filters 'wpgs_disabled_elements'
          * @since 0.1
          */
         protected function set_current_state() {
@@ -535,6 +536,14 @@ if ( ! class_exists('WPGettingStarted') ) :
                 "has_posts"         => ( $this->site_has_posts() ) ? true : false,
             ) );
 
+            $this->disabled_elements = apply_filters( 'wpgs_disabled_elements', array() );
+            if ( ! empty ( $disabled_elements ) ) {
+                foreach ( $disabled_elements as $disabled_element ) {
+                    if ( isset ( $this->progress[$disabled_element] ) )
+                        unset ( $this->progress[$disabled_element] );
+                }
+            }
+
             $i = 0;
             foreach ( $this->progress as $prog ) {
                 if ( $prog )
@@ -542,9 +551,29 @@ if ( ! class_exists('WPGettingStarted') ) :
                 $i++;
             }
 
-            $this->completed_all = apply_filters( 'wpgs_completed_all', ( $this->progress['theme_edited'] && $this->progress['has_pages'] && $this->progress['has_posts'] ), $this->progress );
+            $this->completed_all = $this->is_completed();
 
             $this->walkthrough = apply_filters ( 'wpgs_walkthrough', ( isset ( $_REQUEST['wpgs'] ) && $_REQUEST['wpgs'] == true ) );
+        }
+
+        /**
+         *
+         * @uses apply_filters 'wpgs_completed_all'
+         * @return boolean
+         */
+        private function is_completed() {
+            $completed = true;
+
+            if ( ! in_array ( 'theme_edited', $this->disabled_elements ) )
+                if ( ! $this->progress['theme_edited'] ) $completed = false;
+
+            if ( ! in_array ( 'has_pages', $this->disabled_elements ) )
+                if ( ! $this->progress['has_pages'] ) $completed = false;
+
+            if ( ! in_array ( 'has_posts', $this->disabled_elements ) )
+                if ( ! $this->progress['has_posts'] ) $completed = false;
+
+            return apply_filters( 'wpgs_completed_all', $completed, $this );
         }
 
         /**

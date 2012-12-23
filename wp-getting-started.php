@@ -254,6 +254,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function enqueue_welcome_style() {
             wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
+            do_action ( 'wpgs_enqueue_style' );
         }
 
         /**

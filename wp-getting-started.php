@@ -201,7 +201,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function change_customizer_close_redirect() {
             global $return, $wp_customize;
-            $return = ( $wp_customize->is_theme_active() ) ? admin_url('index.php') : admin_url('themes.php?live=1&wpgs=1');
+            $return = ( $wp_customize->is_theme_active() ) ? admin_url('index.php') : admin_url('themes.php?live_themes=1&wpgs=1');
         }
 
         /**
@@ -549,7 +549,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             do_action( 'wp_before_welcome_panel');
 
             $live_editor = ( is_plugin_active ( 'live-editor/live-editor.php' ) ) ? '&live=1' : '';
-            $live_themes = ( is_plugin_active ( 'live-theme-preview/live-theme-preview.php' ) ) ? '&live=1' : '';
+            $live_themes = ( is_plugin_active ( 'live-theme-preview/live-theme-preview.php' ) ) ? '&live_themes=1' : '';
 
             ?>
             <div class="welcome-panel-content<?php if ( $this->completed_all ) echo " completed"; ?>">

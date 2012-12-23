@@ -563,11 +563,19 @@ if ( ! class_exists('WPGettingStarted') ) :
             <div class="welcome-panel-column-container">
 
                 <div class="welcome-progression-block">
-                    <a href="<?php bloginfo('url'); ?>">
+                    <?php // For some setups you just don't want your users to folow the first, so this is pluggable
+                    if ( has_action ( 'wpgs_disable_first_link' ) ) :
+                        $link = 'javascript:void(0)';
+                    else :
+                        $link = get_bloginfo('url');
+                    endif;
+                    ?>
+
+                    <a href="<?php echo $link ?>">
                         <h2>1. <?php _e( 'Website', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <a href="<?php bloginfo('url'); ?>">
+                    <a href="<?php echo $link ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "setup"; ?>.png">
 
                         <p class="completed"><?php _e( 'Setup your website', 'wp-getting-started' ); ?></p>

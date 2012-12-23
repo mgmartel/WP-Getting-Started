@@ -101,10 +101,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             // Return to dashboard after post
             add_action ( 'submitpage_box', array ( &$this, 'add_wpgs_hidden_field' ) );
             add_action ( 'submitpost_box', array ( &$this, 'add_wpgs_hidden_field' ) );
-            add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 20, 2 );
-
-            // Let WPGS play nice with BFEE
-            add_action ( 'bfee_new_post_redirect', array ( &$this, 'add_wpgs_param' ) );
+            add_filter('redirect_post_location', array ( &$this, 'redirect_post_dashboard' ), 10, 2 );
 
             // Change redirect after close in Live Theme Preview (if active)
             add_action('wp_ltp_init', array ( &$this, 'change_ltp_close_redirect' ) );
@@ -244,7 +241,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
             add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
 
-            add_action ( 'admin_print_styles', array ( &$this, 'enqueue_welcome_style' ) );
+            add_action ( 'admin_print_styles-index.php', array ( &$this, 'enqueue_welcome_style' ) );
 
             if ( $_GET['wpgs_action'] && ! empty ( $_GET['wpgs_action'] ) )
                 add_action ( 'admin_notices', array ( &$this, 'admin_notice' ) );
@@ -256,8 +253,8 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         public function enqueue_welcome_style() {
-            if ( $GLOBALS['current_screen']->id == 'dashboard' )
-                wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
+            wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
+            do_action ( 'wpgs_enqueue_style' );
         }
 
         /**
@@ -388,6 +385,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function is_theme_chosen() {
+            if ( has_filter ( 'wpgs_is_theme_chosen' ) )
+                return apply_filters ( 'wpgs_is_theme_chosen', false );
+
             global $wp_version;
             if ( floatval ( $wp_version ) >= 3.5 )
                 return ( get_stylesheet() != "twentytwelve" );
@@ -401,6 +401,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function is_theme_customized() {
+            if ( has_filter ( 'wpgs_is_theme_customized' ) )
+                return apply_filters ( 'wpgs_is_theme_customized', false );
+
             $options = get_option( "theme_mods_" . get_stylesheet() );
 
             if ( $options ) {
@@ -418,6 +421,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function site_has_pages() {
+            if ( has_filter ( 'wpgs_site_has_pages' ) )
+                return apply_filters ( 'wpgs_site_has_pages', false );
+
             $pages = get_posts( array( 'numberposts' => 1, 'exclude' => array ( 2 ), 'post_type' => 'page' ) );
             return ( ! empty ( $pages ) );
         }
@@ -429,6 +435,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function site_has_posts() {
+            if ( has_filter ( 'wpgs_site_has_posts' ) )
+                return apply_filters ( 'wpgs_site_has_posts', false );
+
             $posts = get_posts( array( 'numberposts' => 1, 'exclude' => array ( 1 ) ) );
             return ( ! empty ( $posts ) );
         }
@@ -515,6 +524,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          *
          * @uses apply_filters 'wpgs_progress'
          * @uses apply_filters 'wpgs_walkthrough'
+         * @uses apply_filters 'wpgs_disabled_elements'
          * @since 0.1
          */
         protected function set_current_state() {
@@ -526,6 +536,14 @@ if ( ! class_exists('WPGettingStarted') ) :
                 "has_posts"         => ( $this->site_has_posts() ) ? true : false,
             ) );
 
+            $this->disabled_elements = apply_filters( 'wpgs_disabled_elements', array() );
+            if ( ! empty ( $disabled_elements ) ) {
+                foreach ( $disabled_elements as $disabled_element ) {
+                    if ( isset ( $this->progress[$disabled_element] ) )
+                        unset ( $this->progress[$disabled_element] );
+                }
+            }
+
             $i = 0;
             foreach ( $this->progress as $prog ) {
                 if ( $prog )
@@ -533,9 +551,25 @@ if ( ! class_exists('WPGettingStarted') ) :
                 $i++;
             }
 
-            $this->completed_all = ( $this->progress['theme_edited'] && $this->progress['has_pages'] && $this->progress['has_posts'] );
+            $this->completed_all = $this->is_completed();
 
             $this->walkthrough = apply_filters ( 'wpgs_walkthrough', ( isset ( $_REQUEST['wpgs'] ) && $_REQUEST['wpgs'] == true ) );
+        }
+
+        /**
+         *
+         * @uses apply_filters 'wpgs_completed_all'
+         * @return boolean
+         */
+        private function is_completed() {
+            $completed = true;
+
+            foreach ( array ( 'theme_edited', 'has_pages', 'has_posts') as $$e ) {
+                if ( ! $this->is_disabled( $$e ) )
+                    if ( ! $this->progress[$$e] ) $completed = false;
+            }
+
+            return apply_filters( 'wpgs_completed_all', $completed, $this );
         }
 
         /**
@@ -547,39 +581,48 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function the_welcome_panel() {
             do_action( 'wp_before_welcome_panel');
-
-            $live_editor = ( is_plugin_active ( 'live-editor/live-editor.php' ) ) ? '&live=1' : '';
-            $live_themes = ( is_plugin_active ( 'live-theme-preview/live-theme-preview.php' ) ) ? '&live_themes=1' : '';
-
+            $header = 1;
             ?>
             <div class="welcome-panel-content<?php if ( $this->completed_all ) echo " completed"; ?>">
             <h3><?php _e( 'Welcome to WordPress!' ); ?></h3>
             <p class="about-description"><?php _e( 'We&#8217;ve assembled some links to get you started:' ); ?></p>
-            <div class="welcome-panel-column-container">
+            <div class="welcome-panel-column-container wp-getting-started">
 
-                <div class="welcome-progression-block">
-                    <a href="<?php bloginfo('url'); ?>">
-                        <h2>1. <?php _e( 'Website', 'wp-getting-started' ); ?></h2>
+                <div class="welcome-progression-block welcome-progression-welcome">
+                    <?php // For some setups you just don't want your users to folow the first, so this is pluggable
+                    if ( has_action ( 'wpgs_disable_first_link' ) ) :
+                        $link = 'javascript:void(0)';
+                    else :
+                        $link = get_bloginfo('url');
+                    endif;
+                    ?>
+
+                    <a href="<?php echo $link ?>">
+                        <h2><?php echo $header . ". "; $header++; _e( 'Website', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <a href="<?php bloginfo('url'); ?>">
+                    <a href="<?php echo $link ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "setup"; ?>.png">
 
                         <p class="completed"><?php _e( 'Setup your website', 'wp-getting-started' ); ?></p>
                     </a>
                 </div>
 
+                <?php if ( ! $this->is_disabled('theme_edited') ) : ?>
+
                 <?php $this->print_arrow (); ?>
 
-                <div class="welcome-progression-block">
+                <div class="welcome-progression-block welcome-progression-theme">
 
-                    <a href="<?php echo admin_url( 'themes.php?wpgs=1' . $live_themes ); ?>">
-                        <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
+                    <a href="<?php echo admin_url( 'themes.php?live_themes=1&wpgs=1' ); ?>">
+                        <h2><?php echo $header . ". "; $header++; _e( 'Theme', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <div class="welcome-progression-block">
+                    <?php if ( ! $this->is_disabled('theme_chosen') ) : ?>
 
-                        <a href="<?php echo admin_url( 'themes.php?wpgs=1' . $live_themes ); ?>">
+                    <div class="welcome-progression-block welcome-progression-choose">
+
+                        <a href="<?php echo admin_url( 'themes.php?live_themes=1&wpgs=1' ); ?>">
                             <img src="<?php echo WPGS_IMAGES_URL . "change"; if ( ! $this->progress['theme_edited'] ) echo "_incomplete";  ?>.png">
 
                             <p<?php if ( $this->progress['theme_edited'] ) echo " class='completed'"; ?>><?php _e ( 'Change', 'wp-getting-started' ); ?></p>
@@ -587,45 +630,66 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                     </div>
 
+                    <?php endif; ?>
+
+                    <?php if ( ! $this->is_disabled('theme_chosen') && ! $this->is_disabled('theme_customized') ) : ?>
+
                     <div class="welcome-progression-block separate">
                         <h2><?php _e( 'or', 'wp-getting-started' ); ?></h2>
                     </div>
 
-                    <div class="welcome-progression-block">
+                    <?php endif; ?>
+
+                    <?php if ( ! $this->is_disabled('theme_customized') ) : ?>
+
+                    <div class="welcome-progression-block welcome-progression-customize">
                         <a href="<?php echo wp_customize_url() . '?wpgs=1'; ?>">
                             <img src="<?php echo WPGS_IMAGES_URL . "customize"; if ( ! $this->progress['theme_customized'] ) echo "_incomplete";  ?>.png">
 
                             <p<?php if ( $this->progress['theme_customized'] ) echo " class='completed'"; ?>><?php _e( 'Customize' ); ?></p>
                         </a>
                     </div>
+
+                    <?php endif; ?>
+
                 </div>
+
+                <?php endif; ?>
+
+                <?php if ( ! $this->is_disabled('has_pages') ) : ?>
 
                 <?php $this->print_arrow ( 2 ); ?>
 
-                <div class="welcome-progression-block">
-                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' . $live_editor ); ?>">
-                        <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
+                <div class="welcome-progression-block welcome-progression-pages">
+                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
+                        <h2><?php echo $header . ". "; $header++; _e( 'Pages', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' . $live_editor ); ?>">
+                    <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "pages"; if ( ! $this->progress['has_pages'] ) echo "_incomplete";  ?>.png">
 
                         <p<?php if ( $this->progress['has_pages'] ) echo " class='completed'"; ?>><?php _e( 'Add some pages to your website', 'wp-getting-started' ); ?></p>
                     </a>
                 </div>
 
+                <?php endif; ?>
+
+                <?php if ( ! $this->is_disabled('has_posts') ) : ?>
+
                 <?php $this->print_arrow ( 3 ); ?>
 
-                <div class="welcome-progression-block">
-                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' . $live_editor ); ?>">
-                        <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
+                <div class="welcome-progression-block welcome-progression-posts">
+                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
+                        <h2><?php echo $header . ". "; $header++; _e ( 'Posts', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' . $live_editor ); ?>">
+                    <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
                         <img src="<?php echo WPGS_IMAGES_URL . "posts"; if ( ! $this->progress['has_posts'] ) echo "_incomplete";  ?>.png">
                         <p<?php if ( $this->progress['has_posts'] ) echo " class='completed'"; ?>><?php _e( 'Create your first blog entry','wp-getting-started' ); ?></p>
                     </a>
                 </div>
+
+                <?php endif; ?>
 
             </div>
 
@@ -637,6 +701,10 @@ if ( ! class_exists('WPGettingStarted') ) :
             <?php
         }
 
+        private function is_disabled ( $e ) {
+            return ( in_array ( $e, $this->disabled_elements ) );
+        }
+
         /**
          * Print the arrow, dark for next step, light for 'not yet'
          *
@@ -644,7 +712,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         private function print_arrow ( $which = 0 ) {
             ?>
-            <div class="welcome-progression-block">
+            <div class="welcome-progression-block arrow-<?php echo $which; ?>">
                 <img src="<?php echo WPGS_IMAGES_URL; ?>arrow_right<?php if ( $this->complete < $which ) echo '2'; ?>.png">
             </div>
             <?php

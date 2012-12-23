@@ -385,6 +385,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function is_theme_chosen() {
+            if ( has_filter ( 'wpgs_is_theme_chosen' ) )
+                return apply_filters ( 'wpgs_is_theme_chosen', false );
+
             global $wp_version;
             if ( floatval ( $wp_version ) >= 3.5 )
                 return ( get_stylesheet() != "twentytwelve" );
@@ -398,6 +401,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function is_theme_customized() {
+            if ( has_filter ( 'wpgs_is_theme_customized' ) )
+                return apply_filters ( 'wpgs_is_theme_customized', false );
+
             $options = get_option( "theme_mods_" . get_stylesheet() );
 
             if ( $options ) {
@@ -415,6 +421,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function site_has_pages() {
+            if ( has_filter ( 'wpgs_site_has_pages' ) )
+                return apply_filters ( 'wpgs_site_has_pages', false );
+
             $pages = get_posts( array( 'numberposts' => 1, 'exclude' => array ( 2 ), 'post_type' => 'page' ) );
             return ( ! empty ( $pages ) );
         }
@@ -426,6 +435,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         protected function site_has_posts() {
+            if ( has_filter ( 'wpgs_site_has_posts' ) )
+                return apply_filters ( 'wpgs_site_has_posts', false );
+
             $posts = get_posts( array( 'numberposts' => 1, 'exclude' => array ( 1 ) ) );
             return ( ! empty ( $posts ) );
         }

@@ -241,7 +241,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             add_action   ( 'welcome_panel', array ( &$this, 'the_welcome_panel' ) );
             add_action   ( 'wp_after_welcome_panel', array ( &$this, 'the_instruction_panel' ) );
 
-            add_action ( 'admin_print_styles', array ( &$this, 'enqueue_welcome_style' ) );
+            add_action ( 'admin_print_styles-index.php', array ( &$this, 'enqueue_welcome_style' ) );
 
             if ( $_GET['wpgs_action'] && ! empty ( $_GET['wpgs_action'] ) )
                 add_action ( 'admin_notices', array ( &$this, 'admin_notice' ) );
@@ -253,8 +253,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         public function enqueue_welcome_style() {
-            if ( $GLOBALS['current_screen']->id == 'dashboard' )
-                wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
+            wp_enqueue_style('wp-getting-started', WPGS_INC_URL . 'css/wp-getting-started.css', null, 0.1 );
         }
 
         /**
@@ -562,7 +561,7 @@ if ( ! class_exists('WPGettingStarted') ) :
             <p class="about-description"><?php _e( 'We&#8217;ve assembled some links to get you started:' ); ?></p>
             <div class="welcome-panel-column-container">
 
-                <div class="welcome-progression-block">
+                <div class="welcome-progression-block welcome-progression-welcome">
                     <?php // For some setups you just don't want your users to folow the first, so this is pluggable
                     if ( has_action ( 'wpgs_disable_first_link' ) ) :
                         $link = 'javascript:void(0)';
@@ -584,13 +583,13 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                 <?php $this->print_arrow (); ?>
 
-                <div class="welcome-progression-block">
+                <div class="welcome-progression-block welcome-progression-theme">
 
                     <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
                         <h2>2. <?php _e( 'Theme', 'wp-getting-started' ); ?></h2>
                     </a>
 
-                    <div class="welcome-progression-block">
+                    <div class="welcome-progression-block welcome-progression-choose">
 
                         <a href="<?php echo admin_url( 'themes.php?live=1&wpgs=1' ); ?>">
                             <img src="<?php echo WPGS_IMAGES_URL . "change"; if ( ! $this->progress['theme_edited'] ) echo "_incomplete";  ?>.png">
@@ -604,7 +603,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                         <h2><?php _e( 'or', 'wp-getting-started' ); ?></h2>
                     </div>
 
-                    <div class="welcome-progression-block">
+                    <div class="welcome-progression-block welcome-progression-customize">
                         <a href="<?php echo wp_customize_url() . '?wpgs=1'; ?>">
                             <img src="<?php echo WPGS_IMAGES_URL . "customize"; if ( ! $this->progress['theme_customized'] ) echo "_incomplete";  ?>.png">
 
@@ -615,7 +614,7 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                 <?php $this->print_arrow ( 2 ); ?>
 
-                <div class="welcome-progression-block">
+                <div class="welcome-progression-block welcome-progression-pages">
                     <a href="<?php echo admin_url( 'post-new.php?post_type=page&wpgs=1' ); ?>">
                         <h2>3. <?php _e( 'Pages', 'wp-getting-started' ); ?></h2>
                     </a>
@@ -629,7 +628,7 @@ if ( ! class_exists('WPGettingStarted') ) :
 
                 <?php $this->print_arrow ( 3 ); ?>
 
-                <div class="welcome-progression-block">
+                <div class="welcome-progression-block welcome-progression-posts">
                     <a href="<?php echo admin_url( 'post-new.php?wpgs=1' ); ?>">
                         <h2>4. <?php _e ( 'Posts', 'wp-getting-started' ); ?></h2>
                     </a>
@@ -657,7 +656,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         private function print_arrow ( $which = 0 ) {
             ?>
-            <div class="welcome-progression-block">
+            <div class="welcome-progression-block arrow-<?php echo $which; ?>">
                 <img src="<?php echo WPGS_IMAGES_URL; ?>arrow_right<?php if ( $this->complete < $which ) echo '2'; ?>.png">
             </div>
             <?php

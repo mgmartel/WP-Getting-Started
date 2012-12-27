@@ -33,6 +33,7 @@ define('WPGS_IMAGES_URL', WPGS_INC_URL . 'images/');
  * Requires and includes
  */
 require_once ( WPGS_DIR . 'lib/class.wp-help-pointers.php' );
+require_once ( WPGS_DIR . 'lib/quick-menu/quick-menu.php' );
 
 if ( ! class_exists('WPGettingStarted') ) :
 
@@ -51,10 +52,10 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @static
         */
         public static function &init() {
-            static $instance = false;
+            static $instance = false;   
 
             if (!$instance) {
-                load_plugin_textdomain('wp-getting-started', false, WPGS_DIR . '/languages/');
+                load_plugin_textdomain('wp-getting-started', false, basename ( WPGS_DIR ) . '/languages/');
                 $instance = new WPGettingStarted;
             }
 

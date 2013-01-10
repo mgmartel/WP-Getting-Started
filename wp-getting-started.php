@@ -52,7 +52,7 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @static
         */
         public static function &init() {
-            static $instance = false;   
+            static $instance = false;
 
             if (!$instance) {
                 load_plugin_textdomain('wp-getting-started', false, basename ( WPGS_DIR ) . '/languages/');
@@ -311,7 +311,18 @@ if ( ! class_exists('WPGettingStarted') ) :
                                 'edge' => 'top',
                                 'align' => 'top'
                             )
-                        )
+                        ),
+                    array(
+                        'id' => 'wpgs_first_step',
+                        'screen' => 'dashboard',
+                        'target' => '.welcome-progression-choose a p',
+                        'title' => __ ( 'Getting Started', 'wp-getting-started' ),
+                        'content' => __( 'Click on the icon above to start creating your website.', 'wp-getting-started' ),
+                        'position' => array(
+                                'edge' => 'top',
+                                'align' => 'left'
+                            )
+                        ),
                     );
             /*} elseif ( $this->completed_all ) {
                  $pointers = array(

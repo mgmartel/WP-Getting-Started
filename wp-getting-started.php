@@ -33,7 +33,6 @@ define('WPGS_IMAGES_URL', WPGS_INC_URL . 'images/');
  * Requires and includes
  */
 require_once ( WPGS_DIR . 'lib/class.wp-help-pointers.php' );
-require_once ( WPGS_DIR . 'lib/quick-menu/quick-menu.php' );
 
 if ( ! class_exists('WPGettingStarted') ) :
 

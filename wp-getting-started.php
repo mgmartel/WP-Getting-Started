@@ -74,6 +74,9 @@ if ( ! class_exists('WPGettingStarted') ) :
             if ( $this->walkthrough )
                 $this->walkthrough_workflow();
 
+            if ( $this->complete < 1 )
+                add_filter ( 'live_admin_pointers', '__return_empty_array' );
+
             add_action ( 'admin_enqueue_scripts', array ( &$this, 'set_pointers' ) );
         }
 
@@ -299,44 +302,18 @@ if ( ! class_exists('WPGettingStarted') ) :
          */
         public function dashboard_pointers() {
             if ( $this->complete < 1 ) {
-                $pointers = array(
-                    array(
+                $pointers = array();
+                    $pointers[] = array(
                         'id' => 'wpgs_dash',
                         'screen' => 'dashboard',
                         'target' => '#menu-dashboard',
                         'title' => __ ( 'Dashboard' ),
                         'content' => __( 'Welcome to your WordPress Dashboard! This is the screen you will see when you log in to your site, and gives you access to all the site management features of WordPress. You can get help for any screen by clicking the Help tab in the upper corner.' ) . "</p><p>" . __ ( "You can always return to this screen by clicking the Dashboard icon above.", 'wp-getting-started' ),
                         'position' => array(
-                                'edge' => 'top',
-                                'align' => 'top'
-                            )
-                        ),
-                    array(
-                        'id' => 'wpgs_first_step',
-                        'screen' => 'dashboard',
-                        'target' => '.welcome-progression-choose a p',
-                        'title' => __ ( 'Getting Started', 'wp-getting-started' ),
-                        'content' => __( 'Click on the icon above to start creating your website.', 'wp-getting-started' ),
-                        'position' => array(
-                                'edge' => 'top',
-                                'align' => 'left'
-                            )
-                        ),
-                    );
-            /*} elseif ( $this->completed_all ) {
-                 $pointers = array(
-                    array(
-                        'id' => 'wpgs_help',
-                        'screen' => 'dashboard',
-                        'target' => '#welcome-panel h3',
-                        'title' => __ ( 'Complete!' ),
-                        'content' => __ ( "You have now set up your website and learned how to manage it. Remember that you can always look up information using the 'Help' tab here.", 'wp-getting-started' ),
-                        'position' => array(
-                                'edge' => 'top',
-                                'align' => 'left'
-                            )
+                            'edge' => 'top',
+                            'align' => 'top'
                         )
-                    );*/
+                    );
             } else return;
 
             $pointers = apply_filters( 'wpgs_dashboard_pointers', $pointers );

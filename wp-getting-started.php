@@ -42,6 +42,7 @@ if ( ! class_exists('WPGettingStarted') ) :
         protected $completed_all = false;
         protected $walkthrough = false;
         protected $progress = array();
+        public    $strings = array();
 
         /**
          * Creates an instance of the WPGettingStarted class
@@ -67,6 +68,9 @@ if ( ! class_exists('WPGettingStarted') ) :
          * @since 0.1
          */
         public function __construct() {
+            require ( WPGS_DIR . 'wp-getting-started-strings.php' );
+            $this->strings = apply_filters ( 'wpgs_strings', $strings );
+
             $this->set_current_state();
 
             $this->set_welcome_panel();
@@ -118,6 +122,37 @@ if ( ! class_exists('WPGettingStarted') ) :
             add_filter ( 'clean_url', array ( &$this, 'modify_theme_action_urls' ) );
             add_action ( 'wp_redirect', array ( &$this, 'modify_switch_theme_redirect' ) );
 
+            // Change post placeholder
+            add_action ( 'live_admin_start-post.php', array ( &$this, 'add_pass_param_into_iframe_filter' ));
+            add_action ( 'live_editor_iframe_init', array ( &$this, 'set_post_placeholder_filter' ) );
+
+            add_filter ( 'default_content', array ( 'WPGettingStarted', 'post_placeholder' ), 10, 2 );
+
+        }
+
+        public function add_pass_param_into_iframe_filter() {
+            add_filter ( 'live_admin_iframe_url', array ( &$this, 'pass_param_into_iframe' ));
+        }
+
+        public function pass_param_into_iframe( $url ) {
+            return $this->add_wpgs_param( $url );
+        }
+
+        public static function post_placeholder ( $placeholder ) {
+            global $post_type;
+
+            $strings = self::get_strings();
+            if ( $post_type == 'page')
+                return "<p>{$strings['first-page']}</p><p>{$strings['pages']}</p>";
+            elseif ( $post_type == 'post' )
+                return "<p>{$strings['first-page']}</p><p>{$strings['posts']}</p>";
+            else
+                return $placeholder;
+        }
+
+        public static function get_strings() {
+            require ( WPGS_DIR . 'wp-getting-started-strings.php' );
+            return $strings;
         }
 
         /**
@@ -332,7 +367,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                                 'screen' => 'post',
                                 'target' => '#menu-posts',
                                 'title' => __ ( 'Posts' ),
-                                'content' => __ ( "Posts are what make your blog a blog - they're servings of content, similar to journal entries, listed in reverse chronological order. Posts can be as short or as long as you like; some are as brief as Twitter updates, while others are the length of essays.", 'wp-getting-started' ),
+                                'content' => $this->strings['posts'],
                                 'position' => array(
                                         'edge' => 'top',
                                         'align' => 'top'
@@ -343,7 +378,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                                 'screen' => 'page',
                                 'target' => '#menu-pages',
                                 'title' => __ ( 'Pages' ),
-                                'content' => __ ( "Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections. You can edit them any time.", 'wp-getting-started' ),
+                                'content' => $this->strings['pages'],
                                 'position' => array(
                                         'edge' => 'top',
                                         'align' => 'top'
@@ -354,7 +389,7 @@ if ( ! class_exists('WPGettingStarted') ) :
                                 'screen' => 'themes',
                                 'target' => '#menu-appearance',
                                 'title' => __ ( 'Themes' ),
-                                'content' => __ ( "Aside from the default theme included with your WordPress installation, themes are designed and developed by third parties. Use the 'Appearance' menu to change your theme. You can change and customize your themes at any time.", 'wp-getting-started' ),
+                                'content' => $this->strings['themes'],
                                 'position' => array(
                                         'edge' => 'top',
                                         'align' => 'top'
@@ -446,60 +481,54 @@ if ( ! class_exists('WPGettingStarted') ) :
             <?php if ( $this->complete < 2 ) : ?>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Congratulations!', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( 'Your new website is now up and running.', 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-first']['first_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-first']['first_text']; ?></p>
                 </div>
 
                 <div class="welcome-panel-column">
-                    <h4>Next step</h4>
-                    <p><?php _e( 'To get started, follow the easy steps above.', 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-first']['second_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-first']['second_text']; ?></p>
                 </div>
 
                 <div class="welcome-panel-column welcome-panel-last">
-                    <h4>Help</h4>
-                    <p><?php _e( 'If things are ever unclear, use the \'Help\' button in top-right corner.', 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-first']['third_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-first']['third_text']; ?></p>
                 </div>
 
             <?php elseif ( ! $this->completed_all ) : ?>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Posts and pages', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( 'Now that your website has a unique look, you need some content.', 'wp-getting-started' ); ?></p>
-                    <p><?php _e( "There's an important difference between pages and posts. Please read the descriptions here, or read further under the help tab.", 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-posts']['first_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-posts']['first_text']; ?></p>
                 </div>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Pages', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( 'Pages are for more timeless content that you want your visitors to be able to easily access from your main menu, like your About Me or Contact sections.', 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-posts']['second_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-posts']['second_text']; ?></p>
                 </div>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Posts', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( 'Posts are entries listed in reverse chronological order on the blog home page or on the posts page.', 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-posts']['third_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-posts']['third_title']; ?></p>
                 </div>
 
             <?php else : ?>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Compeleted!', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( 'You have now set up your website and learned how to manage it.', 'wp-getting-started' ); ?></p>
-                    <p><?php printf ( __( "Click '%s' to close this panel and start using your website. You can always reopen it by selecting 'Screen Options' and then 'Welcome'.", 'wp-getting-started' ),
-                            "<a class='welcome-panel-close' href='" . esc_url( admin_url( '?welcome=0' ) ) . "'>" .  __( 'Dismiss' ) . "</a>" ); ?>
+                    <h4><?php echo $this->strings['welcome-panel-completed']['first_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-completed']['first_text']; ?></p>
+                    <p><?php  ?>
                     </p>
                 </div>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Help', 'wp-getting-started' ); ?></h4>
-                    <p><?php _e( "Remember that you can always consult the 'Help' tab at the top of the screen, to find out more about the screen you are currently viewing.", 'wp-getting-started' ); ?></p>
+                    <h4><?php echo $this->strings['welcome-panel-completed']['second_title']; ?></h4>
+                    <p><?php echo $this->strings['welcome-panel-completed']['second_text']; ?></p>
                 </div>
 
                 <div class="welcome-panel-column">
-                    <h4><?php _e( 'Useful links', 'wp-getting-started' ); ?></h4>
-                    <ul>
-                        <li><?php printf( '<a href="%s">' . __( 'View your site' ) . '</a>', home_url( '/' ) ); ?></li><li><?php printf( '<a id="wp350_add_images" href="%s">' . __( 'Add image/media' ) . '</a>', admin_url( 'media-new.php' ) ); ?></li>
-                        <li><?php printf( '<a id="wp350_widgets" href="%s">' . __( 'Add/remove widgets' ) . '</a>', admin_url( 'widgets.php' ) ); ?></li>
-                        <li><?php printf( '<a id="wp350_edit_menu" href="%s">' . __( 'Edit your navigation menu' ) . '</a>', admin_url( 'nav-menus.php' ) ); ?></li>
-                    </ul>
+                    <h4><?php echo $this->strings['welcome-panel-completed']['third_title']; ?></h4>
+                    <?php echo $this->strings['welcome-panel-completed']['third_text']; ?>
                 </div>
 
             <?php endif;
@@ -709,4 +738,5 @@ if ( ! class_exists('WPGettingStarted') ) :
     }
 
     add_action('admin_init', array('WPGettingStarted', 'init'));
+    add_filter( 'live_editor_post_placeholder', array ( 'WPGettingStarted', 'post_placeholder' ) );
 endif;
